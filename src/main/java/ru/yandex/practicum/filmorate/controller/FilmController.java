@@ -16,7 +16,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private final Map<Integer , Film> films = new HashMap<>();
+    private final Map<Integer, Film> films = new HashMap<>();
     private static final LocalDate AFTER_RELEASE_DATE = LocalDate.of(1895, Month.DECEMBER, 28);
     private Integer id = 1;
 
@@ -28,45 +28,35 @@ public class FilmController {
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        try {
-            if (!films.containsKey(film.getId())) {
-                if (film.getReleaseDate().isBefore(AFTER_RELEASE_DATE)){
-                    throw new ValidationException("Фильм должен быть не раньше " + AFTER_RELEASE_DATE.getDayOfMonth()
-                            + " " + AFTER_RELEASE_DATE.getMonth() + " " + AFTER_RELEASE_DATE.getYear());
-                } else if (film.getDescription().length() >= 200) {
-                    throw new ValidationException("Описание фильма должно быть меньше 200 символов.");
-                }
-                log.debug(String.valueOf(film));
-                film.setId(id++);
-                films.put(film.getId(), film);
-            } else {
-                throw new ValidationException("Этот фильм уже создан.");
+        if (!films.containsKey(film.getId())) {
+            if (film.getReleaseDate().isBefore(AFTER_RELEASE_DATE)) {
+                throw new ValidationException("Фильм должен быть не раньше " + AFTER_RELEASE_DATE.getDayOfMonth()
+                        + " " + AFTER_RELEASE_DATE.getMonth() + " " + AFTER_RELEASE_DATE.getYear());
+            } else if (film.getDescription().length() >= 200) {
+                throw new ValidationException("Описание фильма должно быть меньше 200 символов.");
             }
-        } catch (ValidationException e) {
-            log.error(e.getMessage());
-            throw e;
+            log.debug(film.toString());
+            film.setId(id++);
+            films.put(film.getId(), film);
+        } else {
+            throw new ValidationException("Этот фильм уже создан.");
         }
         return film;
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
-        try {
-            if (films.containsKey(film.getId())) {
-                if (film.getReleaseDate().isBefore(AFTER_RELEASE_DATE)){
-                    throw new ValidationException("Фильм должен быть не раньше " + AFTER_RELEASE_DATE.getDayOfMonth()
-                            + " " + AFTER_RELEASE_DATE.getMonth() + " " + AFTER_RELEASE_DATE.getYear());
-                } else if (film.getDescription().length() >= 200) {
-                    throw new ValidationException("Описание фильма должно быть меньше 200 символов.");
-                }
-                log.debug(String.valueOf(film));
-                films.put(film.getId(), film);
-            } else {
-                throw new ValidationException("Данного фильма нет в списках.");
+        if (films.containsKey(film.getId())) {
+            if (film.getReleaseDate().isBefore(AFTER_RELEASE_DATE)) {
+                throw new ValidationException("Фильм должен быть не раньше " + AFTER_RELEASE_DATE.getDayOfMonth()
+                        + " " + AFTER_RELEASE_DATE.getMonth() + " " + AFTER_RELEASE_DATE.getYear());
+            } else if (film.getDescription().length() >= 200) {
+                throw new ValidationException("Описание фильма должно быть меньше 200 символов.");
             }
-        } catch (ValidationException e) {
-            log.error(e.getMessage());
-            throw e;
+            log.debug(film.toString());
+            films.put(film.getId(), film);
+        } else {
+            throw new ValidationException("Данного фильма нет в списках.");
         }
         return film;
     }

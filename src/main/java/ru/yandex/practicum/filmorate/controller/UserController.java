@@ -25,40 +25,30 @@ public class UserController {
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        try {
-            if (!users.containsKey(user.getId())) {
-                if (user.getName() == null || user.getName().isBlank()) {
-                    user.setName(user.getLogin());
-                }
-                log.debug(String.valueOf(user));
-                user.setId(id++);
-                users.put(user.getId(), user);
-            } else {
-                throw new ValidationException("Этот пользователь уже зарегистрирован.");
+        if (!users.containsKey(user.getId())) {
+            if (user.getName() == null || user.getName().isBlank()) {
+                user.setName(user.getLogin());
             }
-        } catch (ValidationException e) {
-            log.error(e.getMessage());
-            throw e;
+            log.debug(String.valueOf(user));
+            user.setId(id++);
+            users.put(user.getId(), user);
+        } else {
+            throw new ValidationException("Этот пользователь уже зарегистрирован.");
         }
         return user;
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        try {
-            if (users.containsKey(user.getId())) {
-                if (user.getName() == null || user.getName().isBlank()) {
-                    user.setName(user.getLogin());
-                } else {
-                    log.debug(String.valueOf(user));
-                    users.put(user.getId(), user);
-                }
+        if (users.containsKey(user.getId())) {
+            if (user.getName() == null || user.getName().isBlank()) {
+                user.setName(user.getLogin());
             } else {
-                throw new ValidationException("Такого пользователя нет в списке зарегистрированых.");
+                log.debug(String.valueOf(user));
+                users.put(user.getId(), user);
             }
-        } catch (ValidationException e) {
-            log.error(e.getMessage());
-            throw e;
+        } else {
+            throw new ValidationException("Такого пользователя нет в списке зарегистрированых.");
         }
         return user;
     }
