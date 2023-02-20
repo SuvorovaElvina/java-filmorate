@@ -61,12 +61,11 @@ public class FilmControllerTest {
     public void validateDescriptionMax200() throws ValidationException {
         Film film = new Film(1, "name", "Пятеро друзей ( комик-группа «Шарло»)," +
                 " приезжают в город Бризуль. Здесь они хотят разыскать господина Огюста Куглова," +
-                " который задолжал им деньги, а именно 20 миллионов. о Куглов, который за время «сво",
+                " который задолжал им деньги, а именно 20 миллионов. о Куглов, который за время «своё",
                 LocalDate.of(2000, 1, 12), 120L);
-        FilmController controller = new FilmController();
 
-        ValidationException thrown = assertThrows(ValidationException.class, () -> controller.create(film));
-        assertNotNull(thrown.getMessage());
+        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        assertEquals(1, violations.size(), "Создаётся пустое имя");
     }
 
     @Test

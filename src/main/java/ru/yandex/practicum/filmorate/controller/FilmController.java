@@ -55,9 +55,6 @@ public class FilmController {
         if (film.getReleaseDate().isBefore(AFTER_RELEASE_DATE)) {
             throw new ValidationException("Фильм должен быть не раньше " + AFTER_RELEASE_DATE.getDayOfMonth()
                     + " " + AFTER_RELEASE_DATE.getMonth() + " " + AFTER_RELEASE_DATE.getYear());
-        } else if (film.getDescription().length() >= 200) {
-            log.error("Описание фильма должно быть меньше 200 символов.");
-            throw new ValidationException("Описание фильма должно быть меньше 200 символов.");
         }
         log.debug(film.toString());
     }
