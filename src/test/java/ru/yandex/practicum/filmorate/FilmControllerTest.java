@@ -100,4 +100,21 @@ public class FilmControllerTest {
         violations = validator.validate(film1);
         assertEquals(1, violations.size(), "Создаётся минусовая продолжительность фильма");
     }
+
+    @Test
+    public void getListOfFilms() {
+        Film film = new Film(1, "name", "description", LocalDate.of(2000, 1, 12), 120L);
+        FilmController controller = new FilmController();
+        controller.create(film);
+        Film film1 = new Film(2, "name", "description", LocalDate.of(2000, 1, 12), 120L);
+        controller.create(film1);
+
+        assertNotNull(controller.getAllFilms(), "Ничего не добавляет.");
+        assertEquals(controller.getAllFilms().size(), 2, "Не добавляет нужное.");
+
+        Film film2 = new Film(2, "NAME", "description", LocalDate.of(2000, 1, 12), 120L);
+        controller.update(film2);
+
+        assertEquals(controller.getAllFilms().size(), 2, "Добавляет излишнее.");
+    }
 }
