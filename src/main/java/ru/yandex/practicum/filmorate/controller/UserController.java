@@ -9,6 +9,7 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @Slf4j
 @RestController
@@ -26,13 +27,10 @@ public class UserController {
     @PostMapping
     public User create(@Valid @RequestBody User user) {
         if (!users.containsKey(user.getId())) {
-            if (user.getName() == null || user.getName().isBlank()) {
-                user.setName(user.getLogin());
-            }
-            log.debug(String.valueOf(user));
             user.setId(id++);
-            users.put(user.getId(), user);
+            validateUser(user);
         } else {
+            log.error("Этот пользователь уже зарегистрирован.");
             throw new ValidationException("Этот пользователь уже зарегистрирован.");
         }
         return user;
@@ -41,15 +39,21 @@ public class UserController {
     @PutMapping
     public User update(@Valid @RequestBody User user) {
         if (users.containsKey(user.getId())) {
-            if (user.getName() == null || user.getName().isBlank()) {
-                user.setName(user.getLogin());
-            } else {
-                log.debug(String.valueOf(user));
-                users.put(user.getId(), user);
-            }
+            validateUser(user);
         } else {
+            log.error("Такого пользователя нет в списке зарегистрированых.");
             throw new ValidationException("Такого пользователя нет в списке зарегистрированых.");
         }
         return user;
+    }
+
+    private void validateUser(User user) {
+        if (Pattern.matches(user.getLogin(), "\\s")) {
+            throw new ValidationException("Логин не должен содержать пробелы.");
+        } else if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
+        log.debug(user.toString());
+        users.put(user.getId(), user);
     }
 }
