@@ -29,16 +29,10 @@ public class FilmController {
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
         if (!films.containsKey(film.getId())) {
-            if (film.getReleaseDate().isBefore(AFTER_RELEASE_DATE)) {
-                throw new ValidationException("Фильм должен быть не раньше " + AFTER_RELEASE_DATE.getDayOfMonth()
-                        + " " + AFTER_RELEASE_DATE.getMonth() + " " + AFTER_RELEASE_DATE.getYear());
-            } else if (film.getDescription().length() >= 200) {
-                throw new ValidationException("Описание фильма должно быть меньше 200 символов.");
-            }
-            log.debug(film.toString());
             film.setId(id++);
-            films.put(film.getId(), film);
+            validateFilm(film);
         } else {
+            log.error("Этот фильм уже создан.");
             throw new ValidationException("Этот фильм уже создан.");
         }
         return film;
@@ -47,17 +41,23 @@ public class FilmController {
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
         if (films.containsKey(film.getId())) {
-            if (film.getReleaseDate().isBefore(AFTER_RELEASE_DATE)) {
-                throw new ValidationException("Фильм должен быть не раньше " + AFTER_RELEASE_DATE.getDayOfMonth()
-                        + " " + AFTER_RELEASE_DATE.getMonth() + " " + AFTER_RELEASE_DATE.getYear());
-            } else if (film.getDescription().length() >= 200) {
-                throw new ValidationException("Описание фильма должно быть меньше 200 символов.");
-            }
-            log.debug(film.toString());
-            films.put(film.getId(), film);
+            validateFilm(film);
         } else {
+            log.error("Данного фильма нет в списках.");
             throw new ValidationException("Данного фильма нет в списках.");
         }
         return film;
+    }
+
+    private void validateFilm(Film film) {
+        if (film.getReleaseDate().isBefore(AFTER_RELEASE_DATE)) {
+            throw new ValidationException("Фильм должен быть не раньше " + AFTER_RELEASE_DATE.getDayOfMonth()
+                    + " " + AFTER_RELEASE_DATE.getMonth() + " " + AFTER_RELEASE_DATE.getYear());
+        } else if (film.getDescription().length() >= 200) {
+            log.error("Описание фильма должно быть меньше 200 символов.");
+            throw new ValidationException("Описание фильма должно быть меньше 200 символов.");
+        }
+        log.debug(film.toString());
+        films.put(film.getId(), film);
     }
 }
