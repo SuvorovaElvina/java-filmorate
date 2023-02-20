@@ -21,7 +21,7 @@ public class FilmController {
     private Integer id = 1;
 
     @GetMapping
-    public ArrayList<Film> findAll() {
+    public ArrayList<Film> getAllFilms() {
         log.debug("Количество фильмов - {}", films.size());
         return new ArrayList<>(films.values());
     }
