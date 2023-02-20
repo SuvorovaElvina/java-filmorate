@@ -31,6 +31,7 @@ public class FilmController {
         if (!films.containsKey(film.getId())) {
             film.setId(id++);
             validateFilm(film);
+            films.put(film.getId(), film);
         } else {
             log.error("Этот фильм уже создан.");
             throw new ValidationException("Этот фильм уже создан.");
@@ -42,6 +43,7 @@ public class FilmController {
     public Film update(@Valid @RequestBody Film film) {
         if (films.containsKey(film.getId())) {
             validateFilm(film);
+            films.put(film.getId(), film);
         } else {
             log.error("Данного фильма нет в списках.");
             throw new ValidationException("Данного фильма нет в списках.");
@@ -58,6 +60,5 @@ public class FilmController {
             throw new ValidationException("Описание фильма должно быть меньше 200 символов.");
         }
         log.debug(film.toString());
-        films.put(film.getId(), film);
     }
 }
