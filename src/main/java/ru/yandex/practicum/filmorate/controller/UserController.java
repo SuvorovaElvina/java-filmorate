@@ -9,7 +9,6 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 @Slf4j
 @RestController
@@ -48,9 +47,7 @@ public class UserController {
     }
 
     private void validateUser(User user) {
-        if (Pattern.matches(user.getLogin(), "\\s")) {
-            throw new ValidationException("Логин не должен содержать пробелы.");
-        } else if (user.getName() == null || user.getName().isBlank()) {
+        if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
         log.debug(user.toString());
