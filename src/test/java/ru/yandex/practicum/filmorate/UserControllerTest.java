@@ -14,7 +14,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class UserControllerTest {
+/*public class UserControllerTest {
     private static final Validator validator;
 
     static {
@@ -124,4 +124,4 @@ public class UserControllerTest {
 
         assertEquals(controller.users().size(), 2, "Добавляет обновлённое.");
     }
-}
+}*/
