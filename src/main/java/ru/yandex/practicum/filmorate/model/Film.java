@@ -24,14 +24,6 @@ public class Film {
     private Long duration;
     private Set<Integer> likes = new HashSet<>();
 
-    public Film(Integer id, String name, String description, LocalDate releaseDate, Long duration) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-    }
-
     public Integer getCountLikes() {
         return likes.size();
     }
