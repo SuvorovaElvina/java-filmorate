@@ -6,7 +6,10 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.throwable.IncorrectCountException;
+import ru.yandex.practicum.filmorate.throwable.ValidationException;
 
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -15,6 +18,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
+    private static final LocalDate AFTER_RELEASE_DATE = LocalDate.of(1895, Month.DECEMBER, 28);
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
@@ -25,10 +29,12 @@ public class FilmService {
     }
 
     public void createFilm(Film film) {
+        validateFilm(film);
         filmStorage.add(film);
     }
 
     public void updateFilm(Film film) {
+        validateFilm(film);
         filmStorage.update(film);
     }
 
@@ -83,6 +89,13 @@ public class FilmService {
             return sortedFilms.subList(0, count);
         } else {
             return sortedFilms;
+        }
+    }
+
+    private void validateFilm(Film film) {
+        if (film.getReleaseDate().isBefore(AFTER_RELEASE_DATE)) {
+            throw new ValidationException("Фильм должен быть не раньше " + AFTER_RELEASE_DATE.getDayOfMonth()
+                    + " " + AFTER_RELEASE_DATE.getMonth() + " " + AFTER_RELEASE_DATE.getYear());
         }
     }
 }
