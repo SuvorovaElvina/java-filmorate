@@ -64,8 +64,12 @@ public class FilmService {
     public void removeLike(Integer filmId, Integer userId) {
         if (filmStorage.getById(filmId) != null) {
             if (userStorage.getById(userId) != null) {
-                Film film = filmStorage.getAll().get(filmId);
-                film.getLikes().remove(userId);
+                Film film = filmStorage.getById(filmId);
+                if (film.getLikes().contains(userId)) {
+                    film.getLikes().remove(userId);
+                } else {
+                    throw new IncorrectCountException("Этот пользователь не ставил лайк.");
+                }
             } else {
                 throw new NotFoundException("Пользователя с таким id - не существует.");
             }
