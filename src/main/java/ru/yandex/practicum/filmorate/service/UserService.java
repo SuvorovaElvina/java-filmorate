@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -8,16 +8,11 @@ import ru.yandex.practicum.filmorate.throwable.IncorrectCountException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private final UserStorage userStorage;
-
-    @Autowired
-    public UserService(UserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
 
     public void createUser(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
@@ -27,49 +22,58 @@ public class UserService {
     }
 
     public void updateUser(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
         userStorage.update(user);
     }
 
-    public Map<Integer, User> getUsers() {
+    public List<User> getUsers() {
         return userStorage.getAll();
     }
 
     public User getUser(int id) {
-        if (!userStorage.getAll().containsKey(id)) {
+        if (userStorage.getById(id) == null) {
             validateId(id);
         }
-        return userStorage.getAll().get(id);
+        return userStorage.getById(id);
     }
 
     public void addFriend(Integer userId, Integer friendId) {
-        if (!userStorage.getAll().containsKey(userId)) {
+        User user = userStorage.getById(userId);
+        User friend = userStorage.getById(friendId);
+        if (user != null) {
+            if (friend != null) {
+                user.getFriends().add(friendId);
+                friend.getFriends().add(userId);
+            } else {
+                validateId(friendId);
+            }
+        } else {
             validateId(userId);
-        } else if (!userStorage.getAll().containsKey(friendId)) {
-            validateId(friendId);
         }
-        User user = userStorage.getAll().get(userId);
-        User friend = userStorage.getAll().get(friendId);
-        user.getFriends().add(friendId);
-        friend.getFriends().add(userId);
     }
 
     public void removeFriend(Integer userId, Integer friendId) {
-        if (!userStorage.getAll().containsKey(userId)) {
+        User user = userStorage.getById(userId);
+        User friend = userStorage.getById(friendId);
+        if (user != null) {
+            if (friend != null) {
+                user.getFriends().remove(friendId);
+                friend.getFriends().remove(userId);
+            } else {
+                validateId(friendId);
+            }
+        } else {
             validateId(userId);
-        } else if (!userStorage.getAll().containsKey(friendId)) {
-            validateId(friendId);
         }
-        User user = userStorage.getAll().get(userId);
-        User friend = userStorage.getAll().get(friendId);
-        user.getFriends().remove(friendId);
-        friend.getFriends().remove(userId);
     }
 
     public List<User> getFriends(Integer userId) {
         List<User> friends = new ArrayList<>();
-        if (userStorage.getAll().containsKey(userId)) {
-            for (Integer friendsId : userStorage.getAll().get(userId).getFriends()) {
-                friends.add(userStorage.getAll().get(friendsId));
+        if (userStorage.getById(userId) != null) {
+            for (Integer friendsId : userStorage.getById(userId).getFriends()) {
+                friends.add(userStorage.getById(friendsId));
             }
         } else {
             validateId(userId);
@@ -79,13 +83,13 @@ public class UserService {
 
     public List<User> getCommonFriends(Integer userId, Integer otherId) {
         List<User> commonFriends = new ArrayList<>();
-        if (!userStorage.getAll().containsKey(userId) & !userStorage.getAll().containsKey(otherId)) {
+        if (userStorage.getById(userId) == null & userStorage.getById(otherId) == null) {
             validateId(userId);
             validateId(otherId);
         }
-        for (Integer friendsId : userStorage.getAll().get(userId).getFriends()) {
-            if (userStorage.getAll().get(otherId).getFriends().contains(friendsId)) {
-                commonFriends.add(userStorage.getAll().get(friendsId));
+        for (Integer friendsId : userStorage.getById(userId).getFriends()) {
+            if (userStorage.getById(otherId).getFriends().contains(friendsId)) {
+                commonFriends.add(userStorage.getById(friendsId));
             }
         }
         return commonFriends;

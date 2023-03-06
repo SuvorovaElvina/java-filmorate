@@ -1,32 +1,26 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.throwable.IncorrectCountException;
+import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 import ru.yandex.practicum.filmorate.throwable.ValidationException;
 
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class FilmService {
     private static final LocalDate AFTER_RELEASE_DATE = LocalDate.of(1895, Month.DECEMBER, 28);
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
-
-    @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
-    }
 
     public void createFilm(Film film) {
         validateFilm(film);
@@ -38,58 +32,54 @@ public class FilmService {
         filmStorage.update(film);
     }
 
-    public Map<Integer, Film> getFilms() {
+    public List<Film> getFilms() {
         return filmStorage.getAll();
     }
 
     public Film getFilm(int id) {
-        if (filmStorage.getAll().containsKey(id)) {
-            return filmStorage.getAll().get(id);
+        if (filmStorage.getById(id) != null) {
+            return filmStorage.getById(id);
         } else {
             if (id < 0) {
                 throw new IncorrectCountException("id не должно быть меньше 0.");
             } else {
-                throw new IncorrectCountException("Фильм с указанный id - не существует.");
+                throw new NotFoundException("Фильм с указанный id - не существует.");
             }
         }
     }
 
     public void addLike(Integer filmId, Integer userId) {
-        if (filmStorage.getAll().containsKey(filmId)) {
-            if (userStorage.getAll().containsKey(userId)) {
-                Film film = filmStorage.getAll().get(filmId);
+        if (filmStorage.getById(filmId) != null) {
+            if (userStorage.getById(userId) != null) {
+                Film film = filmStorage.getById(filmId);
                 film.getLikes().add(userId);
             } else {
-                throw new IncorrectCountException("Пользователя с таким id - не существует.");
+                throw new NotFoundException("Пользователя с таким id - не существует.");
             }
         } else {
-            throw new IncorrectCountException("Фильма с таким id - не существует");
+            throw new NotFoundException("Фильма с таким id - не существует");
         }
     }
 
     public void removeLike(Integer filmId, Integer userId) {
-        if (filmStorage.getAll().containsKey(filmId)) {
-            if (userStorage.getAll().containsKey(userId)) {
+        if (filmStorage.getById(filmId) != null) {
+            if (userStorage.getById(userId) != null) {
                 Film film = filmStorage.getAll().get(filmId);
                 film.getLikes().remove(userId);
             } else {
-                throw new IncorrectCountException("Пользователя с таким id - не существует.");
+                throw new NotFoundException("Пользователя с таким id - не существует.");
             }
         } else {
-            throw new IncorrectCountException("Фильма с таким id - не существует");
+            throw new NotFoundException("Фильма с таким id - не существует");
         }
     }
 
     public List<Film> getPopularFilms(Integer count) {
-        List<Film> films = new ArrayList<>(filmStorage.getAll().values());
-        List<Film> sortedFilms = films.stream()
+        List<Film> films = filmStorage.getAll();
+        return films.stream()
                 .sorted(Comparator.comparingInt(Film::getCountLikes).reversed())
+                .limit(count)
                 .collect(Collectors.toList());
-        if (sortedFilms.size() > count) {
-            return sortedFilms.subList(0, count);
-        } else {
-            return sortedFilms;
-        }
     }
 
     private void validateFilm(Film film) {
