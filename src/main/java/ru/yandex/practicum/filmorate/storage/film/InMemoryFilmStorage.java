@@ -2,8 +2,12 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.throwable.ConflictException;
+import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -12,13 +16,14 @@ public class InMemoryFilmStorage implements FilmStorage {
     private Integer id = 1;
 
     @Override
-    public void add(Film film) {
+    public Film add(Film film) {
         film.setId(id++);
         if (films.containsKey(film.getId())) {
-            throw new RuntimeException("Этот фильм уже создан.");
+            throw new ConflictException("Этот фильм уже создан.");
         } else {
             films.put(film.getId(), film);
         }
+        return film;
     }
 
     @Override
@@ -27,16 +32,22 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void update(Film film) {
+    public Film update(Film film) {
         if (films.containsKey(film.getId())) {
             films.put(film.getId(), film);
         } else {
-            throw new RuntimeException("Данного фильма нет в списках.");
+            throw new NotFoundException("Данного фильма нет в списках.");
         }
+        return film;
     }
 
     @Override
-    public Map<Integer, Film> getAll() {
-        return this.films;
+    public List<Film> getAll() {
+        return new ArrayList<>(films.values());
+    }
+
+    @Override
+    public Film getById(int id) {
+        return films.get(id);
     }
 }

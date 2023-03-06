@@ -2,8 +2,11 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -12,11 +15,12 @@ public class InMemoryUserStorage implements UserStorage {
     private Integer id = 1;
 
     @Override
-    public void add(User user) {
+    public User add(User user) {
         if (!users.containsKey(user.getId())) {
             user.setId(id++);
             users.put(user.getId(), user);
         }
+        return user;
     }
 
     @Override
@@ -25,16 +29,22 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void update(User user) {
+    public User update(User user) {
         if (!users.containsKey(user.getId())) {
-            throw new RuntimeException("Такого пользователя нет в списке зарегистрированых.");
+            throw new NotFoundException("Такого пользователя нет в списке зарегистрированых.");
         } else {
             users.put(user.getId(), user);
         }
+        return user;
     }
 
     @Override
-    public Map<Integer, User> getAll() {
-        return this.users;
+    public List<User> getAll() {
+        return new ArrayList<>(users.values());
+    }
+
+    @Override
+    public User getById(int id) {
+        return users.get(id);
     }
 }
