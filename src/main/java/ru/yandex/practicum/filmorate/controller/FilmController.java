@@ -24,14 +24,12 @@ public class FilmController {
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        filmService.createFilm(film);
-        return film;
+        return filmService.createFilm(film);
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
-        filmService.updateFilm(film);
-        return film;
+        return filmService.updateFilm(film);
     }
 
     @GetMapping("/{id}")

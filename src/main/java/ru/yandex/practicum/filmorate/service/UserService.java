@@ -14,18 +14,18 @@ import java.util.List;
 public class UserService {
     private final UserStorage userStorage;
 
-    public void createUser(User user) {
+    public User createUser(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-        userStorage.add(user);
+        return userStorage.add(user);
     }
 
-    public void updateUser(User user) {
+    public User updateUser(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-        userStorage.update(user);
+        return userStorage.update(user);
     }
 
     public List<User> getUsers() {

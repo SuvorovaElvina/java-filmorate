@@ -22,14 +22,14 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
-    public void createFilm(Film film) {
+    public Film createFilm(Film film) {
         validateFilm(film);
-        filmStorage.add(film);
+        return filmStorage.add(film);
     }
 
-    public void updateFilm(Film film) {
+    public Film updateFilm(Film film) {
         validateFilm(film);
-        filmStorage.update(film);
+        return filmStorage.update(film);
     }
 
     public List<Film> getFilms() {

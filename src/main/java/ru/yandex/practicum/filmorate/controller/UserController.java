@@ -24,14 +24,12 @@ public class UserController {
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        userService.createUser(user);
-        return user;
+        return userService.createUser(user);
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        userService.updateUser(user);
-        return user;
+        return userService.updateUser(user);
     }
 
     @GetMapping("/{id}")
