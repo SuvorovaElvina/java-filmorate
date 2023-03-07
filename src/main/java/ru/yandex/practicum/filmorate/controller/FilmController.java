@@ -1,61 +1,58 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.throwable.ValidationException;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
-import java.time.Month;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @Slf4j
 @RestController
 @RequestMapping("/films")
+@RequiredArgsConstructor
 public class FilmController {
-    private final Map<Integer, Film> films = new HashMap<>();
-    private static final LocalDate AFTER_RELEASE_DATE = LocalDate.of(1895, Month.DECEMBER, 28);
-    private Integer id = 1;
+    private final FilmService filmService;
 
     @GetMapping
-    public ArrayList<Film> getAllFilms() {
-        log.debug("Количество фильмов - {}", films.size());
-        return new ArrayList<>(films.values());
+    public List<Film> getAllFilms() {
+        log.debug("Количество фильмов - {}", filmService.getFilms().size());
+        return filmService.getFilms();
     }
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        if (!films.containsKey(film.getId())) {
-            film.setId(id++);
-            validateFilm(film);
-            films.put(film.getId(), film);
-        } else {
-            log.error("Этот фильм уже создан.");
-            throw new ValidationException("Этот фильм уже создан.");
-        }
-        return film;
+        return filmService.createFilm(film);
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
-        if (films.containsKey(film.getId())) {
-            validateFilm(film);
-            films.put(film.getId(), film);
-        } else {
-            log.error("Данного фильма нет в списках.");
-            throw new ValidationException("Данного фильма нет в списках.");
-        }
-        return film;
+        return filmService.updateFilm(film);
     }
 
-    private void validateFilm(Film film) {
-        if (film.getReleaseDate().isBefore(AFTER_RELEASE_DATE)) {
-            throw new ValidationException("Фильм должен быть не раньше " + AFTER_RELEASE_DATE.getDayOfMonth()
-                    + " " + AFTER_RELEASE_DATE.getMonth() + " " + AFTER_RELEASE_DATE.getYear());
+    @GetMapping("/{id}")
+    public Film getFilms(@PathVariable int id) {
+        return filmService.getFilm(id);
+    }
+
+    @GetMapping("/popular")
+    public List<Film> getPopularFilms(@RequestParam(required = false) String count) {
+        if (count == null) {
+            return filmService.getPopularFilms(10);
+        } else {
+            return filmService.getPopularFilms(Integer.parseInt(count));
         }
-        log.debug(film.toString());
+    }
+
+    @PutMapping("/{id}/like/{userId}")
+    public void addLike(@PathVariable("id") int id, @PathVariable("userId") int userId) {
+        filmService.addLike(id, userId);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public void removeLike(@PathVariable("id") int id, @PathVariable("userId") int userId) {
+        filmService.removeLike(id, userId);
     }
 }
