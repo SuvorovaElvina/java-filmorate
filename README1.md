@@ -4,21 +4,21 @@
 
 # Примеры запросов: 
 ## Вызов топ 5 популярных фильмов по лайкам.
-```SELECT f.title; COUNT(fl.user_id)\
-FROM film AS f\
-JOIN film_like AS fl ON fl.film_id = f.film_id\
-GROUP BY title\
-ORDER BY COUNT(fl.user_id) DESC\
+```SELECT f.title; COUNT(fl.user_id)
+FROM film AS f
+JOIN film_like AS fl ON fl.film_id = f.film_id
+GROUP BY title
+ORDER BY COUNT(fl.user_id) DESC
 LIMIT 5;
 ```
 ## Получение жанра фильмов.
-```SELECT title\
-FROM film AS f\
-JOIN genre AS g ON g.genre_id = f.genre_id\
+```SELECT title
+FROM film AS f
+JOIN genre AS g ON g.genre_id = f.genre_id
 GROUP BY title;
 ```
 ## Получение пользователей которые не ввели имя.
-```SELECT name\
-FROM user\
+```SELECT name
+FROM user
 WHERE login = name;
 ```
