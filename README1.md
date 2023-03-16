@@ -12,6 +12,7 @@ GROUP BY title
 ORDER BY COUNT(fl.user_id) DESC
 LIMIT 5;
 ```
+***
 ## Получение жанра фильмов.
 ```
 SELECT title
@@ -19,6 +20,7 @@ FROM film AS f
 JOIN genre AS g ON g.genre_id = f.genre_id
 GROUP BY title;
 ```
+***
 ## Получение пользователей которые не ввели имя.
 ```
 SELECT name
