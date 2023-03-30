@@ -19,13 +19,13 @@ public class MpaController {
     private final MpaService mpaService;
 
     @GetMapping
-    public List<Mpa> getAllMpas() {
-        log.debug("Количество фильмов - {}", mpaService.getMpas().size());
-        return mpaService.getMpas();
+    public List<Mpa> getAllMpa() {
+        log.debug("Количество фильмов - {}", mpaService.getAllMpa().size());
+        return mpaService.getAllMpa();
     }
 
     @GetMapping("/{id}")
-    public Mpa getMpas(@PathVariable int id) {
+    public Mpa getMpa(@PathVariable int id) {
         return mpaService.getMpa(id);
     }
 }

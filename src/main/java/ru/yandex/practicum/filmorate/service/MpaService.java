@@ -16,7 +16,7 @@ public class MpaService {
         this.mpaStorage = mpaStorage;
     }
 
-    public List<Mpa> getMpas() {
+    public List<Mpa> getAllMpa() {
         return mpaStorage.getAll();
     }
 
