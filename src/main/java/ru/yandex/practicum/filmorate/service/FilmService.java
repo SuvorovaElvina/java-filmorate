@@ -11,9 +11,7 @@ import ru.yandex.practicum.filmorate.throwable.ValidationException;
 
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
@@ -55,8 +53,7 @@ public class FilmService {
     public void addLike(Integer filmId, Integer userId) {
         if (filmStorage.getById(filmId) != null) {
             if (userStorage.getById(userId) != null) {
-                Film film = filmStorage.getById(filmId);
-                film.getLikes().add(userId);
+                filmStorage.addLike(filmId, userId);
             } else {
                 throw new NotFoundException("Пользователя с таким id - не существует.");
             }
@@ -68,12 +65,7 @@ public class FilmService {
     public void removeLike(Integer filmId, Integer userId) {
         if (filmStorage.getById(filmId) != null) {
             if (userStorage.getById(userId) != null) {
-                Film film = filmStorage.getById(filmId);
-                if (film.getLikes().contains(userId)) {
-                    film.getLikes().remove(userId);
-                } else {
-                    throw new IncorrectCountException("Этот пользователь не ставил лайк.");
-                }
+                filmStorage.removeLike(filmId, userId);
             } else {
                 throw new NotFoundException("Пользователя с таким id - не существует.");
             }
@@ -83,11 +75,7 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilms(Integer count) {
-        List<Film> films = filmStorage.getAll();
-        return films.stream()
-                .sorted(Comparator.comparingInt(Film::getCountLikes).reversed())
-                .limit(count)
-                .collect(Collectors.toList());
+        return filmStorage.getPopularFilms(count);
     }
 
     private void validateFilm(Film film) {

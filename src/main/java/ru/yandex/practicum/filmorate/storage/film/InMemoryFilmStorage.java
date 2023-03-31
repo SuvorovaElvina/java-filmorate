@@ -3,12 +3,11 @@ package ru.yandex.practicum.filmorate.storage.film;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.throwable.ConflictException;
+import ru.yandex.practicum.filmorate.throwable.IncorrectCountException;
 import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component("inMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
@@ -49,5 +48,30 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film getById(int id) {
         return films.get(id);
+    }
+
+    @Override
+    public void addLike(Integer filmId, Integer userId) {
+        Film film = getById(filmId);
+        film.getLikes().add(userId);
+    }
+
+    @Override
+    public void removeLike(Integer filmId, Integer userId) {
+        Film film = getById(filmId);
+        if (film.getLikes().contains(userId)) {
+            film.getLikes().remove(userId);
+        } else {
+            throw new IncorrectCountException("Этот пользователь не ставил лайк.");
+        }
+    }
+
+    @Override
+    public List<Film> getPopularFilms(Integer count) {
+        List<Film> films = getAll();
+        return films.stream()
+                .sorted(Comparator.comparingInt(Film::getCountLikes).reversed())
+                .limit(count)
+                .collect(Collectors.toList());
     }
 }
