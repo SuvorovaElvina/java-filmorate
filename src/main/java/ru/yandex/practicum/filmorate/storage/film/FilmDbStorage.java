@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
 import java.sql.Date;
@@ -20,22 +21,24 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component("filmDbStorage")
 public class FilmDbStorage implements FilmStorage {
     private final Logger log = LoggerFactory.getLogger(FilmDbStorage.class);
     private final JdbcTemplate jdbcTemplate;
-    private final UserDbStorage userDbStorage;
+    private final UserStorage userDbStorage;
 
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, UserDbStorage userDbStorage) {
+    public FilmDbStorage(JdbcTemplate jdbcTemplate,
+                         @Qualifier("userDbStorage") UserStorage userStorage) {
         this.jdbcTemplate = jdbcTemplate;
-        this.userDbStorage = userDbStorage;
+        this.userDbStorage = userStorage;
     }
 
     @Override
-    public Film add(Film film) {
-        final String sql = "insert into films(name, description, releaseDate, duration, mpa_id) values (?, ?, ?, ?, ?)";
+    public Optional<Film> add(Film film) {
+        final String sql = "insert into films(name, description, release_date, duration, mpa_id) values (?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"id"});
@@ -49,7 +52,7 @@ public class FilmDbStorage implements FilmStorage {
         film.setId(keyHolder.getKeyAs(Integer.class));
         addGenre(film);
         log.info("Фильм добавлен");
-        return film;
+        return Optional.ofNullable(film);
     }
 
     @Override
@@ -60,8 +63,8 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film update(Film film) {
-        String sql = "update films set name = ?, description = ?, releaseDate = ?, duration = ?, mpa_id = ? where id = ?";
+    public Optional<Film> update(Film film) {
+        String sql = "update films set name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? where id = ?";
         int updateCount = jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"id"});
             stmt.setString(1, film.getName());
@@ -77,7 +80,7 @@ public class FilmDbStorage implements FilmStorage {
         }
         addGenre(film);
         log.info("Фильм изменён");
-        return film;
+        return Optional.ofNullable(film);
     }
 
     @Override
@@ -87,12 +90,12 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film getById(int id) {
+    public Optional<Film> getById(int id) {
         try {
             String sql = "select * from films where id = ?";
-            return jdbcTemplate.queryForObject(sql, this::mapRowToFilm, id);
+            return Optional.of(jdbcTemplate.queryForObject(sql, this::mapRowToFilm, id));
         } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("Такого фильма нет в списке зарегистрированых.");
+            return Optional.empty();
         }
     }
 
@@ -127,11 +130,11 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getPopularFilms(Integer count) {
-        String sql = "select t.id, t.name, t.description, t.releaseDate, t.duration, t.mpa_id from " +
-                "(select f.id, f.name, f.description, f.releaseDate, f.duration, f.mpa_id, count(fl.FILM_ID) likes_count " +
+        String sql = "select t.id, t.name, t.description, t.release_date, t.duration, t.mpa_id from " +
+                "(select f.id, f.name, f.description, f.release_date, f.duration, f.mpa_id, count(fl.FILM_ID) likes_count " +
                 "from films f, film_likes fl " +
                 "where f.id = fl.film_id union " +
-                "select f.id, f.name, f.description, f.releaseDate, f.duration, f.mpa_id, 0 likes_count " +
+                "select f.id, f.name, f.description, f.release_date, f.duration, f.mpa_id, 0 likes_count " +
                 "from films f where f.id not in " +
                 "(select film_id from film_likes group by film_id) order by likes_count desc) t limit ?";
         return jdbcTemplate.query(sql, this::mapRowToFilm, count);
@@ -141,7 +144,7 @@ public class FilmDbStorage implements FilmStorage {
         return new Film(resultSet.getInt("id"),
                 resultSet.getString("name"),
                 resultSet.getString("description"),
-                resultSet.getDate("releaseDate").toLocalDate(),
+                resultSet.getDate("release_date").toLocalDate(),
                 resultSet.getLong("duration"),
                 createMpa(resultSet.getInt("mpa_id")), createSetGenres(resultSet.getInt("id")));
     }
