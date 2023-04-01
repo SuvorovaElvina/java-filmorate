@@ -19,7 +19,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FilmServiceTest {
+public class FilmServiceInMemoryTest {
     private static final Validator validator;
     private static final UserStorage userStorage = new InMemoryUserStorage();
     private static final FilmStorage filmStorage = new InMemoryFilmStorage();

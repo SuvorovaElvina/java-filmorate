@@ -16,7 +16,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class UserServiceTest {
+public class UserServiceInMemoryTest {
     private static final Validator validator;
     private static final UserStorage users = new InMemoryUserStorage();
     private static final UserService service = new UserService(users);
