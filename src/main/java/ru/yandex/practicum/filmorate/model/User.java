@@ -14,6 +14,7 @@ import java.util.Set;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class User {
     private Integer id;
     @NotBlank(message = "Email не должно быть пустым.")
