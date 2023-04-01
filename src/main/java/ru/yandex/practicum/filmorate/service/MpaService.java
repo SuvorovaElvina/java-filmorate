@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.throwable.IncorrectCountException;
 import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MpaService {
@@ -21,8 +22,9 @@ public class MpaService {
     }
 
     public Mpa getMpa(int id) {
-        if (mpaStorage.getById(id) != null) {
-            return mpaStorage.getById(id);
+        Optional<Mpa> mpaOpt = mpaStorage.getById(id);
+        if (mpaOpt.isPresent()) {
+            return mpaOpt.get();
         } else {
             if (id < 0) {
                 throw new IncorrectCountException("id не должно быть меньше 0.");

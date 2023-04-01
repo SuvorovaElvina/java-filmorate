@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.throwable.IncorrectCountException;
 import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class GenreService {
@@ -21,8 +22,9 @@ public class GenreService {
     }
 
     public Genre getGenre(int id) {
-        if (genreStorage.getById(id) != null) {
-            return genreStorage.getById(id);
+        Optional<Genre> genreOpt = genreStorage.getById(id);
+        if (genreOpt.isPresent()) {
+            return genreOpt.get();
         } else {
             if (id < 0) {
                 throw new IncorrectCountException("id не должно быть меньше 0.");

@@ -4,10 +4,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component("inMemoryUserStorage")
 public class InMemoryUserStorage implements UserStorage {
@@ -15,12 +12,12 @@ public class InMemoryUserStorage implements UserStorage {
     private Integer id = 1;
 
     @Override
-    public User add(User user) {
+    public Optional<User> add(User user) {
         if (!users.containsKey(user.getId())) {
             user.setId(id++);
             users.put(user.getId(), user);
         }
-        return user;
+        return Optional.ofNullable(user);
     }
 
     @Override
@@ -29,13 +26,13 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User update(User user) {
+    public Optional<User> update(User user) {
         if (!users.containsKey(user.getId())) {
             throw new NotFoundException("Такого пользователя нет в списке зарегистрированых.");
         } else {
             users.put(user.getId(), user);
         }
-        return user;
+        return Optional.ofNullable(user);
     }
 
     @Override
@@ -44,13 +41,17 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getById(Integer id) {
-        return users.get(id);
+    public Optional<User> getById(Integer id) {
+        return Optional.ofNullable(users.get(id));
     }
 
     @Override
     public void addFriend(Integer userId, Integer friendId) {
-        getById(userId).getFriends().add(getById(friendId).getId());
+        Optional<User> userOpt = getById(userId);
+        Optional<User> friendOpt = getById(friendId);
+        if (userOpt.isPresent() && friendOpt.isPresent()) {
+            userOpt.get().getFriends().add(friendOpt.get().getId());
+        }
     }
 
     @Override

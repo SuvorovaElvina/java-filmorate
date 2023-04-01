@@ -16,6 +16,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 @Component("userDbStorage")
 public class UserDbStorage implements UserStorage {
@@ -27,7 +28,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User add(User user) {
+    public Optional<User> add(User user) {
         final String sql = "insert into users(login, name, email, birthday) values (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -40,7 +41,7 @@ public class UserDbStorage implements UserStorage {
         }, keyHolder);
         user.setId(keyHolder.getKeyAs(Integer.class));
         log.info("Пользователь добавлен");
-        return user;
+        return Optional.of(user);
     }
 
     @Override
@@ -51,7 +52,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User update(User user) {
+    public Optional<User> update(User user) {
         String sql = "update users set login = ?, name = ?, email = ?, birthday = ? where id = ?";
         int updateCount = jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"id"});
@@ -66,7 +67,7 @@ public class UserDbStorage implements UserStorage {
             throw new NotFoundException("Такого пользователя нет в списке зарегистрированых.");
         }
         log.info("Пользователь изменён");
-        return user;
+        return Optional.of(user);
     }
 
     @Override
@@ -76,17 +77,17 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User getById(Integer id) {
+    public Optional<User> getById(Integer id) {
         try {
             String sql = "select * from users where id = ?";
-            return jdbcTemplate.queryForObject(sql, this::mapRowToUser, id);
+            return Optional.of(jdbcTemplate.queryForObject(sql, this::mapRowToUser, id));
         } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("Такого пользователя нет в списке зарегистрированых.");
+            return Optional.empty();
         }
     }
 
     @Override
-    public void addFriend(Integer userId, Integer friendId) { //достать друга проверить есть ли у него друг этот пользователь тогдп оба тру или заявка отправлена - ?
+    public void addFriend(Integer userId, Integer friendId) {
         getById(userId);
         getById(friendId);
         final String sql = "insert into friends (user_id, friend_id) values(?,?)";

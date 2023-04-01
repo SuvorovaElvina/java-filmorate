@@ -15,14 +15,14 @@ public class InMemoryFilmStorage implements FilmStorage {
     private Integer id = 1;
 
     @Override
-    public Film add(Film film) {
+    public Optional<Film> add(Film film) {
         film.setId(id++);
         if (films.containsKey(film.getId())) {
             throw new ConflictException("Этот фильм уже создан.");
         } else {
             films.put(film.getId(), film);
         }
-        return film;
+        return Optional.ofNullable(film);
     }
 
     @Override
@@ -31,13 +31,13 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film update(Film film) {
+    public Optional<Film> update(Film film) {
         if (films.containsKey(film.getId())) {
             films.put(film.getId(), film);
         } else {
             throw new NotFoundException("Данного фильма нет в списках.");
         }
-        return film;
+        return Optional.ofNullable(film);
     }
 
     @Override
@@ -46,23 +46,27 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film getById(int id) {
-        return films.get(id);
+    public Optional<Film> getById(int id) {
+        return Optional.ofNullable(films.get(id));
     }
 
     @Override
     public void addLike(Integer filmId, Integer userId) {
-        Film film = getById(filmId);
-        film.getLikes().add(userId);
+        Optional<Film> filmOpt = getById(filmId);
+        if (filmOpt.isPresent()) {
+            filmOpt.get().getLikes().add(userId);
+        }
     }
 
     @Override
     public void removeLike(Integer filmId, Integer userId) {
-        Film film = getById(filmId);
-        if (film.getLikes().contains(userId)) {
-            film.getLikes().remove(userId);
-        } else {
-            throw new IncorrectCountException("Этот пользователь не ставил лайк.");
+        Optional<Film> filmOpt = getById(filmId);
+        if (filmOpt.isPresent()) {
+            if (filmOpt.get().getLikes().contains(userId)) {
+                filmOpt.get().getLikes().remove(userId);
+            } else {
+                throw new IncorrectCountException("Этот пользователь не ставил лайк.");
+            }
         }
     }
 

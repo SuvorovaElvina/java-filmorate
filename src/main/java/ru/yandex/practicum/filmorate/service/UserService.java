@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.throwable.IncorrectCountException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -20,14 +21,14 @@ public class UserService {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-        return userStorage.add(user);
+        return userStorage.add(user).get();
     }
 
     public User updateUser(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-        return userStorage.update(user);
+        return userStorage.update(user).get();
     }
 
     public List<User> getUsers() {
@@ -35,14 +36,16 @@ public class UserService {
     }
 
     public User getUser(int id) {
-        if (userStorage.getById(id) == null) {
+        Optional<User> userOpt = userStorage.getById(id);
+        if (userOpt.isPresent()) {
+            return userOpt.get();
+        } else {
             if (id < 0) {
                 throw new IncorrectCountException("id не должно быть меньше 0.");
             } else {
                 throw new IncorrectCountException("Пользователя с указанным id - не существует.");
             }
         }
-        return userStorage.getById(id);
     }
 
     public void addFriend(Integer userId, Integer friendId) {
