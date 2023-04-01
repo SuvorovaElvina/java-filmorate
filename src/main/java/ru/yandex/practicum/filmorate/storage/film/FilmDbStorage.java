@@ -120,7 +120,7 @@ public class FilmDbStorage implements FilmStorage {
     public void removeLike(Integer filmId, Integer userId) {
         getById(filmId);
         userDbStorage.getById(userId);
-        String sql = "delete from film_genres where film_id = ?";
+        String sql = "delete from film_likes where film_id = ?";
         jdbcTemplate.update(sql, filmId);
         log.info("Лайк от пользователя - {} удалён.", userId);
     }
