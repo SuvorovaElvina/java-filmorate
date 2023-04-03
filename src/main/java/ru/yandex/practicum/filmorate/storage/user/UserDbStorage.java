@@ -104,15 +104,16 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getFriends(Integer id) {
-        String sql = "select u.* from users u where u.id in (select friend_id from friends f where f.user_id = ?)";
+        String sql = "select u.* from users u join friends f on u.id = f.friend_id where f.user_id = ?";
         log.info("Получен список друзей пользователя {}", id);
         return jdbcTemplate.query(sql, this::mapRowToUser, id);
     }
 
     @Override
-    public List<User> getCommonFriends(Integer id, Integer otherId) { //подумать
+    public List<User> getCommonFriends(Integer id, Integer otherId) {
         String sql = "select u.* from users u where u.id in (select friend_id from friends f " +
-                "where f.user_id = ? or f.user_id = ? GROUP BY friend_id HAVING count(friend_id) >= 2)";
+                "where f.user_id = ? or f.user_id = ? " +
+                "group by friend_id having count(friend_id) >= 2)";
         log.info("Получен список общих друзей пользователя {} и {}", id, otherId);
         return jdbcTemplate.query(sql, this::mapRowToUser, id, otherId);
     }
