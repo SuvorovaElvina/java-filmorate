@@ -11,12 +11,14 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
+    private final GenreDbStorage genreStorage;
 
     @Override
     public Film add(Film film) {
@@ -79,7 +82,9 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> getAll() {
         String sql = "select f.*, r.name mpa_name from films f " +
                 "join mpa r on f.mpa_id = r.id";
-        return jdbcTemplate.query(sql, this::mapRowToFilm);
+        List<Film> all = jdbcTemplate.query(sql, this::mapRowToFilm);
+        genreStorage.getGenresForFilms(all);
+        return all;
     }
 
     @Override
@@ -88,7 +93,9 @@ public class FilmDbStorage implements FilmStorage {
             String sql = "select f.*, r.name mpa_name from films f " +
                     "join mpa r on f.mpa_id = r.id " +
                     "where f.id = ?";
-            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, this::mapRowToFilm, id));
+            List<Film> film = List.of(Objects.requireNonNull(jdbcTemplate.queryForObject(sql, this::mapRowToFilm, id)));
+            genreStorage.getGenresForFilms(film);
+            return Optional.ofNullable(film.get(0));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
@@ -125,7 +132,9 @@ public class FilmDbStorage implements FilmStorage {
                 "left join film_likes fl on f.id = fl.film_id " +
                 "left join mpa r on f.mpa_id = r.id " +
                 "group by f.id order by likes_count desc limit ?";
-        return jdbcTemplate.query(sql, this::mapRowToFilm, count);
+        List<Film> all = jdbcTemplate.query(sql, this::mapRowToFilm, count);
+        genreStorage.getGenresForFilms(all);
+        return all;
     }
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
@@ -134,16 +143,7 @@ public class FilmDbStorage implements FilmStorage {
                 resultSet.getString("description"),
                 resultSet.getDate("release_date").toLocalDate(),
                 resultSet.getLong("duration"),
-                new Mpa(resultSet.getInt("mpa_id"), resultSet.getString("mpa_name")),
-                createSetGenres(resultSet.getInt("id")));
-    }
-
-    private List<Genre> createSetGenres(Integer id) {
-        String sql = "select g.* from genres g, film_genres fg where g.id = fg.genre_id and fg.film_id = ?";
-        return jdbcTemplate.query(sql, (rs, rowNum) ->
-                new Genre(
-                        rs.getInt("id"),
-                        rs.getString("name")), id);
+                new Mpa(resultSet.getInt("mpa_id"), resultSet.getString("mpa_name")));
     }
 
     private void addGenre(Film film) {
