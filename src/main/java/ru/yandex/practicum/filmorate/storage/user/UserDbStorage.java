@@ -9,7 +9,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -62,10 +61,11 @@ public class UserDbStorage implements UserStorage {
             return stmt;
         });
         if (updateCount <= 0) {
-            throw new NotFoundException("Такого пользователя нет в списке зарегистрированых.");
+            return Optional.empty();
+        } else {
+            log.info("Пользователь изменён");
+            return Optional.of(user);
         }
-        log.info("Пользователь изменён");
-        return Optional.of(user);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class UserDbStorage implements UserStorage {
     public Optional<User> getById(Integer id) {
         try {
             String sql = "select * from users where id = ?";
-            return Optional.of(jdbcTemplate.queryForObject(sql, this::mapRowToUser, id));
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, this::mapRowToUser, id));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
@@ -86,8 +86,6 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void addFriend(Integer userId, Integer friendId) {
-        getById(userId);
-        getById(friendId);
         final String sql = "insert into friends (user_id, friend_id) values(?,?)";
         this.jdbcTemplate.batchUpdate(sql,
                 new BatchPreparedStatementSetter() {
@@ -121,8 +119,6 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void removeFriend(Integer userId, Integer friendId) {
-        getById(userId);
-        getById(friendId);
         String sql = "delete from friends where user_id = ? and friend_id = ?";
         jdbcTemplate.update(sql, userId, friendId);
         log.info("Пользователь {} - удалил из друзей пользователя {}.", userId, friendId);
