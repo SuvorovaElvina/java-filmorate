@@ -21,7 +21,8 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
-    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage, @Qualifier("userDbStorage") UserStorage userStorage) {
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
+                       @Qualifier("userDbStorage") UserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
@@ -33,7 +34,8 @@ public class FilmService {
 
     public Film updateFilm(Film film) {
         validateFilm(film);
-        return filmStorage.update(film).get();
+        Optional<Film> filmOptional = filmStorage.update(film);
+        return filmOptional.orElseThrow(() -> new NotFoundException("Такого фильма нет в списке зарегистрированных."));
     }
 
     public List<Film> getFilms() {

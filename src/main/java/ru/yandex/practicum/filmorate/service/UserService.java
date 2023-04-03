@@ -29,7 +29,8 @@ public class UserService {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-        return userStorage.update(user).get();
+        Optional<User> userOptional = userStorage.update(user);
+        return userOptional.orElseThrow(() -> new NotFoundException("Такого пользователя нет в списке зарегистрированых."));
     }
 
     public List<User> getUsers() {
