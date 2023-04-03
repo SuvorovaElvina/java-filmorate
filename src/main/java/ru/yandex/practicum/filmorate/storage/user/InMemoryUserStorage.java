@@ -12,12 +12,12 @@ public class InMemoryUserStorage implements UserStorage {
     private Integer id = 1;
 
     @Override
-    public Optional<User> add(User user) {
+    public User add(User user) {
         if (!users.containsKey(user.getId())) {
             user.setId(id++);
             users.put(user.getId(), user);
         }
-        return Optional.ofNullable(user);
+        return user;
     }
 
     @Override

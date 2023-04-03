@@ -15,14 +15,14 @@ public class InMemoryFilmStorage implements FilmStorage {
     private Integer id = 1;
 
     @Override
-    public Optional<Film> add(Film film) {
+    public Film add(Film film) {
         film.setId(id++);
         if (films.containsKey(film.getId())) {
             throw new ConflictException("Этот фильм уже создан.");
         } else {
             films.put(film.getId(), film);
         }
-        return Optional.ofNullable(film);
+        return film;
     }
 
     @Override

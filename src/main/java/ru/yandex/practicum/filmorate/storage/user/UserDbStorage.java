@@ -24,7 +24,7 @@ public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Optional<User> add(User user) {
+    public User add(User user) {
         final String sql = "insert into users(login, name, email, birthday) values (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -37,7 +37,7 @@ public class UserDbStorage implements UserStorage {
         }, keyHolder);
         user.setId(keyHolder.getKeyAs(Integer.class));
         log.info("Пользователь добавлен");
-        return Optional.of(user);
+        return user;
     }
 
     @Override

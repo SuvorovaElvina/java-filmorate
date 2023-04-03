@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FilmStorage {
-    Optional<Film> add(Film film);
+    Film add(Film film);
 
     void remove(Integer id);
 

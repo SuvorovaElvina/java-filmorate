@@ -27,7 +27,7 @@ public class FilmService {
 
     public Film createFilm(Film film) {
         validateFilm(film);
-        return filmStorage.add(film).get();
+        return filmStorage.add(film);
     }
 
     public Film updateFilm(Film film) {

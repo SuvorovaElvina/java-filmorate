@@ -28,7 +28,7 @@ public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Optional<Film> add(Film film) {
+    public Film add(Film film) {
         final String sql = "insert into films(name, description, release_date, duration, mpa_id) values (?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -43,7 +43,7 @@ public class FilmDbStorage implements FilmStorage {
         film.setId(keyHolder.getKeyAs(Integer.class));
         addGenre(film);
         log.info("Фильм добавлен");
-        return Optional.of(film);
+        return film;
     }
 
     @Override
