@@ -30,7 +30,7 @@ public class MpaDbStorage implements MpaStorage {
         try {
             String sql = "select * from mpa where id = ?";
             log.info("Получение рейтинга с id = {}.", id);
-            return Optional.of(jdbcTemplate.queryForObject(sql, this::mapRowToMpa, id));
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, this::mapRowToMpa, id));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }

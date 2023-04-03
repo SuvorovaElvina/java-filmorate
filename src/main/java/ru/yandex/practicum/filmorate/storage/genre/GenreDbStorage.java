@@ -30,7 +30,7 @@ public class GenreDbStorage implements GenreStorage {
         try {
             String sql = "select * from genres where id = ?";
             log.info("Получение жанра с id = {}.", id);
-            return Optional.of(jdbcTemplate.queryForObject(sql, this::mapRowToGenre, id));
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, this::mapRowToGenre, id));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
