@@ -1,12 +1,11 @@
 package ru.yandex.practicum.filmorate.storage.mpa;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,13 +13,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
+@Slf4j
+@RequiredArgsConstructor
 public class MpaDbStorage implements MpaStorage {
-    private final Logger log = LoggerFactory.getLogger(GenreDbStorage.class);
     private final JdbcTemplate jdbcTemplate;
-
-    public MpaDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public List<Mpa> getAll() {
