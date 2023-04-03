@@ -43,20 +43,15 @@ class FilmDbStorageTests {
 
     @Test
     public void testCreateFilm() {
-        Optional<Film> filmOptional = filmStorage.add(new Film("gg", "desc",
+        Film film = filmStorage.add(new Film("gg", "desc",
                 LocalDate.of(2026, 7, 21), 100L,
                 new Mpa(1, "G"), List.of(new Genre(1, "Комедия"))));
 
-        assertThat(filmOptional)
-                .isPresent()
-                .hasValueSatisfying(film ->
-                        assertThat(film).hasFieldOrPropertyWithValue("id", 1)
-                                .hasFieldOrPropertyWithValue("name", "gg")
-                                .hasFieldOrPropertyWithValue("description", "desc")
-                                .hasFieldOrPropertyWithValue("releaseDate", LocalDate.of(2026, 7, 21))
-                                .hasFieldOrPropertyWithValue("duration", 100L)
-
-                );
+        assertThat(film).hasFieldOrPropertyWithValue("id", 1)
+                .hasFieldOrPropertyWithValue("name", "gg")
+                .hasFieldOrPropertyWithValue("description", "desc")
+                .hasFieldOrPropertyWithValue("releaseDate", LocalDate.of(2026, 7, 21))
+                .hasFieldOrPropertyWithValue("duration", 100L);
     }
 
     @Test

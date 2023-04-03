@@ -51,19 +51,14 @@ class UserDbStorageTests {
 
     @Test
     public void testCreateUser() {
-        Optional<User> userOptional = userStorage.add(new User("gmail@mail.ru", "log",
+        User user = userStorage.add(new User("gmail@mail.ru", "log",
                 "Nike", LocalDate.of(1999, 7, 21)));
 
-        assertThat(userOptional)
-                .isPresent()
-                .hasValueSatisfying(user ->
-                        assertThat(user).hasFieldOrPropertyWithValue("id", 1)
-                                .hasFieldOrPropertyWithValue("name", "Nike")
-                                .hasFieldOrPropertyWithValue("email", "gmail@mail.ru")
-                                .hasFieldOrPropertyWithValue("login", "log")
-                                .hasFieldOrPropertyWithValue("birthday", LocalDate.of(1999, 7, 21))
-
-                );
+        assertThat(user).hasFieldOrPropertyWithValue("id", 1)
+                .hasFieldOrPropertyWithValue("name", "Nike")
+                .hasFieldOrPropertyWithValue("email", "gmail@mail.ru")
+                .hasFieldOrPropertyWithValue("login", "log")
+                .hasFieldOrPropertyWithValue("birthday", LocalDate.of(1999, 7, 21));
     }
 
     @Test
