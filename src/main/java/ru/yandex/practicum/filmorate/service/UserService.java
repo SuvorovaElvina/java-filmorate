@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.throwable.IncorrectCountException;
+import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +44,7 @@ public class UserService {
             if (id < 0) {
                 throw new IncorrectCountException("id не должно быть меньше 0.");
             } else {
-                throw new IncorrectCountException("Пользователя с указанным id - не существует.");
+                throw new NotFoundException("Пользователя с указанным id - не существует.");
             }
         }
     }
