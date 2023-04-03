@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
@@ -78,14 +77,17 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getAll() {
-        String sql = "select * from films";
+        String sql = "select f.*, r.name mpa_name from films f " +
+                "join mpa r on f.mpa_id = r.id";
         return jdbcTemplate.query(sql, this::mapRowToFilm);
     }
 
     @Override
     public Optional<Film> getById(int id) {
         try {
-            String sql = "select * from films where id = ?";
+            String sql = "select f.*, r.name mpa_name from films f " +
+                    "join mpa r on f.mpa_id = r.id " +
+                    "where f.id = ?";
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, this::mapRowToFilm, id));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
@@ -119,13 +121,10 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getPopularFilms(Integer count) {
-        String sql = "select t.id, t.name, t.description, t.release_date, t.duration, t.mpa_id from " +
-                "(select f.id, f.name, f.description, f.release_date, f.duration, f.mpa_id, count(fl.FILM_ID) likes_count " +
-                "from films f, film_likes fl " +
-                "where f.id = fl.film_id union " +
-                "select f.id, f.name, f.description, f.release_date, f.duration, f.mpa_id, 0 likes_count " +
-                "from films f where f.id not in " +
-                "(select film_id from film_likes group by film_id) order by likes_count desc) t limit ?";
+        String sql = "select f.*, r.name mpa_name, count(fl.film_id) likes_count from films f " +
+                "left join film_likes fl on f.id = fl.film_id " +
+                "left join mpa r on f.mpa_id = r.id " +
+                "group by f.id order by likes_count desc limit ?";
         return jdbcTemplate.query(sql, this::mapRowToFilm, count);
     }
 
@@ -135,17 +134,8 @@ public class FilmDbStorage implements FilmStorage {
                 resultSet.getString("description"),
                 resultSet.getDate("release_date").toLocalDate(),
                 resultSet.getLong("duration"),
-                createMpa(resultSet.getInt("mpa_id")), createSetGenres(resultSet.getInt("id")));
-    }
-
-    private Mpa createMpa(Integer id) {
-        String sql = "select name from mpa where id = ?";
-        return jdbcTemplate.queryForObject(sql, new RowMapper<Mpa>() {
-            @Override
-            public Mpa mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return new Mpa(id, rs.getString("name"));
-            }
-        }, id);
+                new Mpa(resultSet.getInt("mpa_id"), resultSet.getString("mpa_name")),
+                createSetGenres(resultSet.getInt("id")));
     }
 
     private List<Genre> createSetGenres(Integer id) {
