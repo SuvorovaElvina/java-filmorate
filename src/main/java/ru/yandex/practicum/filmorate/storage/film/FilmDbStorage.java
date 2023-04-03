@@ -1,8 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -13,8 +12,6 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
-import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -25,16 +22,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component("filmDbStorage")
+@Slf4j
+@RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
-    private final Logger log = LoggerFactory.getLogger(FilmDbStorage.class);
     private final JdbcTemplate jdbcTemplate;
-    private final UserStorage userDbStorage;
-
-    public FilmDbStorage(JdbcTemplate jdbcTemplate,
-                         @Qualifier("userDbStorage") UserStorage userStorage) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.userDbStorage = userStorage;
-    }
 
     @Override
     public Optional<Film> add(Film film) {
@@ -52,11 +43,12 @@ public class FilmDbStorage implements FilmStorage {
         film.setId(keyHolder.getKeyAs(Integer.class));
         addGenre(film);
         log.info("Фильм добавлен");
-        return Optional.ofNullable(film);
+        return Optional.of(film);
     }
 
     @Override
     public void remove(Integer id) {
+        getById(id);
         String sql = "delete from films where id = ?";
         jdbcTemplate.update(sql, id);
         log.info("Фильм удалён");
@@ -76,11 +68,12 @@ public class FilmDbStorage implements FilmStorage {
             return stmt;
         });
         if (updateCount <= 0) {
-            throw new NotFoundException("Такого фильма нет в списке зарегистрированых.");
+            return Optional.empty();
+        } else {
+            addGenre(film);
+            log.info("Фильм изменён");
+            return Optional.of(film);
         }
-        addGenre(film);
-        log.info("Фильм изменён");
-        return Optional.ofNullable(film);
     }
 
     @Override
@@ -93,7 +86,7 @@ public class FilmDbStorage implements FilmStorage {
     public Optional<Film> getById(int id) {
         try {
             String sql = "select * from films where id = ?";
-            return Optional.of(jdbcTemplate.queryForObject(sql, this::mapRowToFilm, id));
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, this::mapRowToFilm, id));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
@@ -101,8 +94,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void addLike(Integer filmId, Integer userId) {
-        getById(filmId);
-        userDbStorage.getById(userId);
         final String sql = "insert into film_likes (film_id, user_id) values(?,?)";
         this.jdbcTemplate.batchUpdate(sql,
                 new BatchPreparedStatementSetter() {
@@ -121,8 +112,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void removeLike(Integer filmId, Integer userId) {
-        getById(filmId);
-        userDbStorage.getById(userId);
         String sql = "delete from film_likes where film_id = ?";
         jdbcTemplate.update(sql, filmId);
         log.info("Лайк от пользователя - {} удалён.", userId);
