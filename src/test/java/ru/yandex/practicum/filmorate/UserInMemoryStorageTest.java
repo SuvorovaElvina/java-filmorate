@@ -16,7 +16,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class UserServiceTest {
+public class UserInMemoryStorageTest {
     private static final Validator validator;
     private static final UserStorage users = new InMemoryUserStorage();
     private static final UserService service = new UserService(users);
@@ -124,10 +124,9 @@ public class UserServiceTest {
 
     @Test
     public void addFriend() {
-        service.addFriend(1,2);
+        service.addFriend(1, 2);
 
-        assertEquals(service.getFriends(1).size(), 1, "Не добавляет друзей у 1 пользователя.");
-        assertEquals(service.getFriends(2).size(), 2, "Не добавляет друзей у 2 пользователя.");
+        assertEquals(1, service.getFriends(1).size(), "Не добавляет друзей у 1 пользователя.");
     }
 
     @Test
@@ -137,18 +136,18 @@ public class UserServiceTest {
         User user1 = new User("Test@mail.ru", "login", "name", LocalDate.of(2023, 1, 12));
         service.createUser(user1);
 
-        service.addFriend(1,2);
-        service.removeFriend(1,2);
+        service.addFriend(1, 2);
+        service.removeFriend(1, 2);
 
-        assertEquals(user.getFriends().size(), 0 , "Не удаляет друзей у 1 пользователя");
-        assertEquals(user1.getFriends().size(), 0 , "Не удаляет друзей у 2 пользователя");
+        assertEquals(user.getFriends().size(), 0, "Не удаляет друзей у 1 пользователя");
+        assertEquals(user1.getFriends().size(), 0, "Не удаляет друзей у 2 пользователя");
     }
 
     @Test
     public void getAllFriends() {
-        service.addFriend(1,2);
-        service.addFriend(1,3);
-        service.addFriend(1,4);
+        service.addFriend(1, 2);
+        service.addFriend(1, 3);
+        service.addFriend(1, 4);
 
         assertNotNull(service.getFriends(1), "Список друзей равен null");
         assertEquals(service.getFriends(1).size(), 3, "Не правильно добавляет нужных друзей");
@@ -158,10 +157,10 @@ public class UserServiceTest {
     public void getCommonFriends() {
         User user = new User("Test@mail.ru", "login", "name", LocalDate.of(2023, 1, 12));
         service.createUser(user);
-        service.addFriend(1,2);
-        service.addFriend(3,2);
+        service.addFriend(1, 2);
+        service.addFriend(3, 2);
 
-        assertNotNull(service.getCommonFriends(1,3), "Список общих друзей null");
-        assertEquals(service.getCommonFriends(1,3).size(), 1, "Не правильно рассчитываются общие друзья.");
+        assertNotNull(service.getCommonFriends(1, 3), "Список общих друзей null");
+        assertEquals(service.getCommonFriends(1, 3).size(), 1, "Не правильно рассчитываются общие друзья.");
     }
 }

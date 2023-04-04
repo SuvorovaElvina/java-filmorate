@@ -1,8 +1,10 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.throwable.IncorrectCountException;
@@ -11,15 +13,16 @@ import ru.yandex.practicum.filmorate.throwable.ValidationException;
 
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class FilmService {
     private static final LocalDate AFTER_RELEASE_DATE = LocalDate.of(1895, Month.DECEMBER, 28);
+    @Qualifier("filmDbStorage")
     private final FilmStorage filmStorage;
+    @Qualifier("userDbStorage")
     private final UserStorage userStorage;
 
     public Film createFilm(Film film) {
@@ -29,7 +32,8 @@ public class FilmService {
 
     public Film updateFilm(Film film) {
         validateFilm(film);
-        return filmStorage.update(film);
+        Optional<Film> filmOptional = filmStorage.update(film);
+        return filmOptional.orElseThrow(() -> new NotFoundException("Такого фильма нет в списке зарегистрированных."));
     }
 
     public List<Film> getFilms() {
@@ -37,8 +41,9 @@ public class FilmService {
     }
 
     public Film getFilm(int id) {
-        if (filmStorage.getById(id) != null) {
-            return filmStorage.getById(id);
+        Optional<Film> filmOpt = filmStorage.getById(id);
+        if (filmOpt.isPresent()) {
+            return filmOpt.get();
         } else {
             if (id < 0) {
                 throw new IncorrectCountException("id не должно быть меньше 0.");
@@ -51,8 +56,7 @@ public class FilmService {
     public void addLike(Integer filmId, Integer userId) {
         if (filmStorage.getById(filmId) != null) {
             if (userStorage.getById(userId) != null) {
-                Film film = filmStorage.getById(filmId);
-                film.getLikes().add(userId);
+                filmStorage.addLike(filmId, userId);
             } else {
                 throw new NotFoundException("Пользователя с таким id - не существует.");
             }
@@ -62,28 +66,19 @@ public class FilmService {
     }
 
     public void removeLike(Integer filmId, Integer userId) {
-        if (filmStorage.getById(filmId) != null) {
-            if (userStorage.getById(userId) != null) {
-                Film film = filmStorage.getById(filmId);
-                if (film.getLikes().contains(userId)) {
-                    film.getLikes().remove(userId);
-                } else {
-                    throw new IncorrectCountException("Этот пользователь не ставил лайк.");
-                }
-            } else {
-                throw new NotFoundException("Пользователя с таким id - не существует.");
-            }
-        } else {
+        Optional<Film> filmOpt = filmStorage.getById(filmId);
+        Optional<User> userOpt = userStorage.getById(userId);
+        if (filmOpt.isEmpty()) {
             throw new NotFoundException("Фильма с таким id - не существует");
         }
+        if (userOpt.isEmpty()) {
+            throw new NotFoundException("Пользователя с таким id - не существует.");
+        }
+        filmStorage.removeLike(filmId, userId);
     }
 
     public List<Film> getPopularFilms(Integer count) {
-        List<Film> films = filmStorage.getAll();
-        return films.stream()
-                .sorted(Comparator.comparingInt(Film::getCountLikes).reversed())
-                .limit(count)
-                .collect(Collectors.toList());
+        return filmStorage.getPopularFilms(count);
     }
 
     private void validateFilm(Film film) {
