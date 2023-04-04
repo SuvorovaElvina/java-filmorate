@@ -9,6 +9,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -42,9 +43,11 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void remove(Integer id) {
-        getById(id);
         String sql = "delete from users where id = ?";
-        jdbcTemplate.update(sql, id);
+        int updateCount = jdbcTemplate.update(sql, id);
+        if (updateCount <= 0) {
+            throw new NotFoundException("Фильма не существует. Удаление не возможно.");
+        }
         log.info("Пользователь удалён");
     }
 

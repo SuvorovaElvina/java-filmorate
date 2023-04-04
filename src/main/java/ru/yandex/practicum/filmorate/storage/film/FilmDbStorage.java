@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
+import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -50,9 +51,11 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void remove(Integer id) {
-        getById(id);
         String sql = "delete from films where id = ?";
-        jdbcTemplate.update(sql, id);
+        int updateCount = jdbcTemplate.update(sql, id);
+        if (updateCount <= 0) {
+            throw new NotFoundException("Фильма не существует. Удаление не возможно.");
+        }
         log.info("Фильм удалён");
     }
 
