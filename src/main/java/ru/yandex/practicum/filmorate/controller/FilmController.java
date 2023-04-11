@@ -2,11 +2,14 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -37,6 +40,7 @@ public class FilmController {
         return filmService.getFilm(id);
     }
 
+
     @GetMapping("/popular")
     public List<Film> getPopularFilms(@RequestParam(required = false) String count) {
         if (count == null) {
@@ -45,14 +49,21 @@ public class FilmController {
             return filmService.getPopularFilms(Integer.parseInt(count));
         }
     }
-
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable("id") int id, @PathVariable("userId") int userId) {
         filmService.addLike(id, userId);
     }
 
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam(value = "userId", defaultValue = "0",required = true) String userId,
+                                     @RequestParam(value = "friendId", defaultValue = "0",required = true) String friendId) {
+        return filmService.getCommonFilms(Integer.parseInt(userId), Integer.parseInt(friendId));
+    }
+
+
     @DeleteMapping("/{id}/like/{userId}")
     public void removeLike(@PathVariable("id") int id, @PathVariable("userId") int userId) {
         filmService.removeLike(id, userId);
     }
+
 }

@@ -8,7 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -104,6 +106,16 @@ class FilmDbStorageTests {
         Optional<Film> filmOptional = filmStorage.getById(1);
 
         assertThat(filmOptional).isEmpty();
+    }
+
+    @Test
+    public void testGetCommonFilms() {
+        filmStorage.addLike(1, 1);
+        filmStorage.addLike(1, 2);
+        List<Film> filmOptional = filmStorage.getCommonFilms(1, 2);
+
+        assertThat(filmOptional.size()).isEqualTo(1);
+        assertThat(filmOptional.get(0).getId()).isEqualTo(1);
     }
 }
 

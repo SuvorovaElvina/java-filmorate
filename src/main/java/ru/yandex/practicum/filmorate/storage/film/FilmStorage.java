@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import ru.yandex.practicum.filmorate.model.Film;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,5 +22,6 @@ public interface FilmStorage {
 
     void removeLike(Integer filmId, Integer userId);
 
-    List<Film> getPopularFilms(Integer count);
+    public List<Film> getPopularFilms(Integer count);
+    List<Film> getCommonFilms(Integer id, Integer otherId);
 }
