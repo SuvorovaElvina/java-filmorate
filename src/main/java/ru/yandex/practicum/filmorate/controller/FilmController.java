@@ -55,4 +55,10 @@ public class FilmController {
     public void removeLike(@PathVariable("id") int id, @PathVariable("userId") int userId) {
         filmService.removeLike(id, userId);
     }
+
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam(value = "userId", defaultValue = "0", required = true) String userId,
+                                     @RequestParam(value = "friendId", defaultValue = "0", required = true) String friendId) {
+        return filmService.getCommonFilms(Integer.parseInt(userId), Integer.parseInt(friendId));
+    }
 }
