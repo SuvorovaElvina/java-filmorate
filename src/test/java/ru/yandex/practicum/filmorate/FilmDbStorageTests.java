@@ -105,5 +105,15 @@ class FilmDbStorageTests {
 
         assertThat(filmOptional).isEmpty();
     }
+
+    @Test
+    public void testGetCommonFilms() {
+        filmStorage.addLike(1, 1);
+        filmStorage.addLike(1, 2);
+        List<Film> filmOptional = filmStorage.getCommonFilms(1, 2);
+
+        assertThat(filmOptional.size()).isEqualTo(1);
+        assertThat(filmOptional.get(0).getId()).isEqualTo(1);
+    }
 }
 

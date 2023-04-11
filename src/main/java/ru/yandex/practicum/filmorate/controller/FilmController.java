@@ -37,6 +37,7 @@ public class FilmController {
         return filmService.getFilm(id);
     }
 
+
     @GetMapping("/popular")
     public List<Film> getPopularFilms(@RequestParam(required = false) String count) {
         if (count == null) {
@@ -51,8 +52,16 @@ public class FilmController {
         filmService.addLike(id, userId);
     }
 
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam(value = "userId", defaultValue = "0", required = true) String userId,
+                                     @RequestParam(value = "friendId", defaultValue = "0", required = true) String friendId) {
+        return filmService.getCommonFilms(Integer.parseInt(userId), Integer.parseInt(friendId));
+    }
+
+
     @DeleteMapping("/{id}/like/{userId}")
     public void removeLike(@PathVariable("id") int id, @PathVariable("userId") int userId) {
         filmService.removeLike(id, userId);
     }
+
 }

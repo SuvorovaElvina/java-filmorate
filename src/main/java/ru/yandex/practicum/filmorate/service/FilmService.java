@@ -54,8 +54,8 @@ public class FilmService {
     }
 
     public void addLike(Integer filmId, Integer userId) {
-        if (filmStorage.getById(filmId) != null) {
-            if (userStorage.getById(userId) != null) {
+        if (filmStorage.getById(filmId).isPresent()) {
+            if (userStorage.getById(userId).isPresent()) {
                 filmStorage.addLike(filmId, userId);
             } else {
                 throw new NotFoundException("Пользователя с таким id - не существует.");
@@ -75,6 +75,10 @@ public class FilmService {
             throw new NotFoundException("Пользователя с таким id - не существует.");
         }
         filmStorage.removeLike(filmId, userId);
+    }
+
+    public List<Film> getCommonFilms(Integer id, Integer otherId) {
+        return filmStorage.getCommonFilms(id, otherId);
     }
 
     public List<Film> getPopularFilms(Integer count) {
