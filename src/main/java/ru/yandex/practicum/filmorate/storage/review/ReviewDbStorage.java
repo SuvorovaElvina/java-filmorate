@@ -2,7 +2,9 @@ package ru.yandex.practicum.filmorate.storage.review;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -103,21 +105,46 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public void likeReview(Integer reviewId, Integer userId) {
-
+        String sqlQuery = "INSERT INTO review_likes (review_id, user_id, isLike) VALUES (?, ?, true)";
+        try {
+            jdbcTemplate.update(sqlQuery, reviewId, userId);
+        } catch (DataAccessException e) {
+            log.warn("Некорректный отзыв или пользователь");
+            throw new NotFoundException("Некорректный отзыв или пользователь");
+        }
+        String sqlUsefulUpd = "UPDATE reviews SET useful = useful + 1 WHERE review_id = ? AND user_id = ?";
+        jdbcTemplate.update(sqlUsefulUpd, reviewId, userId);
+        log.info("Отзыв id={} получил лайк от пользователя id={}.", reviewId, userId);
     }
 
     @Override
     public void dislikeReview(Integer reviewId, Integer userId) {
-
+        String sqlQuery = "INSERT INTO review_likes (review_id, user_id, isLike) VALUES (?, ?, false)";
+        try {
+            jdbcTemplate.update(sqlQuery, reviewId, userId);
+        } catch (DataAccessException e) {
+            log.warn("Некорректный отзыв или пользователь");
+            throw new NotFoundException("Некорректный отзыв или пользователь");
+        }
+        String sqlUsefulUpd = "UPDATE reviews SET useful = useful - 1 WHERE review_id = ? AND user_id = ?";
+        jdbcTemplate.update(sqlUsefulUpd, reviewId, userId);
+        log.info("Отзыв id={} получил дизлайк от пользователя id={}.", reviewId, userId);
     }
 
     @Override
     public void revokeLikeReview(Integer reviewId, Integer userId) {
-
+        String sqlQuery = "DELETE FROM review_likes WHERE review_id = ? AND user_id = ?";
+        try {
+            jdbcTemplate.update(sqlQuery, reviewId, userId);
+        } catch (DataAccessException e) {
+            log.warn("Вызван некорректный отзыв или пользователь");
+            throw new NotFoundException("Некорректный отзыв или пользователь");
+        }
     }
 
     @Override
     public void revokeDislikeReview(Integer reviewId, Integer userId) {
-
+        revokeLikeReview(reviewId, userId);
     }
+
 }
