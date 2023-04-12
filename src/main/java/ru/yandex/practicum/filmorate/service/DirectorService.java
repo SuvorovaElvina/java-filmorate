@@ -21,7 +21,7 @@ public class DirectorService {
 
     public Director updateDirector(Director director) {
         Optional<Director> directorOpt = directorStorage.update(director);
-        return directorOpt.orElseThrow(() -> new NotFoundException("Такого фильма нет в списке зарегистрированных."));
+        return directorOpt.orElseThrow(() -> new NotFoundException("Такого режиссёра нет в списке зарегистрированных."));
     }
 
     public List<Director> getDirectors() {
@@ -36,7 +36,7 @@ public class DirectorService {
             if (id < 0) {
                 throw new IncorrectCountException("id не должно быть меньше 0.");
             } else {
-                throw new NotFoundException("Фильм с указанный id - не существует.");
+                throw new NotFoundException("Режиссёр с указанный id - не существует.");
             }
         }
     }
