@@ -29,6 +29,7 @@ public class Film {
     @NotNull(message = "Рейтинг фильма не может быть пустым.")
     private Mpa mpa;
     private List<Genre> genres = new ArrayList<>();
+    private List<Director> directors = new ArrayList<>();
 
     public Film(String name, String description, LocalDate releaseDate, Long duration, Mpa mpa, List<Genre> genres) {
         this.name = name;
