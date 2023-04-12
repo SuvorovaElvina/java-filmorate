@@ -8,14 +8,13 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -73,6 +72,29 @@ public class DirectorDbStorage implements DirectorStorage {
             return Optional.ofNullable(film.get(0));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
+        }
+    }
+
+    public void getDirectorForFilms(List<Film> films) {
+        Map<Integer, List<Director>> directors = new LinkedHashMap<>();
+        List<Integer> id = new ArrayList<>();
+        for (Film film : films) {
+            id.add(film.getId());
+        }
+        String inSql = String.join(",", Collections.nCopies(films.size(), "?"));
+        String sql = "select fd.film_id, d.* from film_directors fd " +
+                "join directors d on d.id = fd.director_id " +
+                "where fd.film_id in (%s)";
+        jdbcTemplate.query(String.format(sql, inSql), rs -> {
+            Integer filmId = rs.getInt("film_id");
+            directors.putIfAbsent(filmId, new ArrayList<>());
+            Director genre = new Director(rs.getInt("id"), rs.getString("name"));
+            directors.get(filmId).add(genre);
+        }, id.toArray());
+        for (Film film : films) {
+            if (directors.get(film.getId()) != null) {
+                film.setDirectors(directors.get(film.getId()));
+            }
         }
     }
 
