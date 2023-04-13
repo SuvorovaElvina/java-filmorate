@@ -16,8 +16,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ReviewService {
 
-    private ReviewStorage reviewStorage;
-    private UserStorage userStorage;
+    private final ReviewStorage reviewStorage;
+    private final UserStorage userStorage;
 
     public Review addReview(Review review) {
         return reviewStorage.addReview(review);
