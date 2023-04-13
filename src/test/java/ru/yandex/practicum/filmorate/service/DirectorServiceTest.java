@@ -10,8 +10,8 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.throwable.IncorrectCountException;
 import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThrows;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assert.*;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
