@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -84,7 +83,7 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public List<Review> getReviewsForFilm(Integer filmId, Integer count) {
-        if (filmId < 0) {                                                        // УТОЧНИТЬ УСЛОВИЕ ПОСЛЕ КОНТРОЛЛЕРА!
+        if (filmId == 0) {                                                        // УТОЧНИТЬ УСЛОВИЕ ПОСЛЕ КОНТРОЛЛЕРА!
             String sqlQuery = "SELECT * FROM reviews ORDER BY useful DESC LIMIT ?";
             return jdbcTemplate.query(sqlQuery, (rs, rowNUm) -> mapRowToReview(rs), count);
         } else {
