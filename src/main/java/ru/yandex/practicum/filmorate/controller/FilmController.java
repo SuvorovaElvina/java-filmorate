@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -54,5 +55,16 @@ public class FilmController {
     @DeleteMapping("/{id}/like/{userId}")
     public void removeLike(@PathVariable("id") int id, @PathVariable("userId") int userId) {
         filmService.removeLike(id, userId);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getFilmsByDirector(@PathVariable("directorId") int directorId, @RequestParam String sortBy) {
+        if (sortBy.equals("year")) {
+            return filmService.getFilmsByYear(directorId);
+        } else if (sortBy.equals("likes")) {
+            return filmService.getFilmsByLikes(directorId);
+        } else {
+            throw new NotFoundException("Укажите сортировку по какому критерию: year, likes");
+        }
     }
 }
