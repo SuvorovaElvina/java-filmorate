@@ -88,7 +88,7 @@ class UserServiceTest {
     }
 
     @Test
-    public void FindUserById() {
+    public void findUserById() {
         User user = userService.getUser(2);
 
         assertThat(user).hasFieldOrPropertyWithValue("id", 2)
@@ -99,7 +99,7 @@ class UserServiceTest {
     }
 
     @Test
-    public void FindUserByIdUnknown() {
+    public void findUserByIdUnknown() {
         Throwable thrown = assertThrows(NotFoundException.class, () -> {
             userService.getUser(9999);
         });
@@ -108,7 +108,7 @@ class UserServiceTest {
     }
 
     @Test
-    public void FindUserByIdNegative() {
+    public void findUserByIdNegative() {
         Throwable thrown = assertThrows(IncorrectCountException.class, () -> {
             userService.getUser(-1);
         });
