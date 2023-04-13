@@ -84,7 +84,7 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public List<Review> getReviewsForFilm(Integer filmId, Integer count) {
-        if (filmId < 0) {                                                        // УТОЧНИТЬ УСЛОВИЕ !
+        if (filmId < 0) {                                                        // УТОЧНИТЬ УСЛОВИЕ ПОСЛЕ КОНТРОЛЛЕРА!
             String sqlQuery = "SELECT * FROM reviews ORDER BY useful DESC LIMIT ?";
             return jdbcTemplate.query(sqlQuery, (rs, rowNUm) -> mapRowToReview(rs), count);
         } else {
@@ -94,13 +94,18 @@ public class ReviewDbStorage implements ReviewStorage {
     }
 
     private Review mapRowToReview(ResultSet rs) throws SQLException {
-        return Review.builder()
+        /*return Review.builder()
                 .id(rs.getInt("review_id"))
                 .content(rs.getString("content"))
                 .isPositive(rs.getBoolean("isPositive"))
                 .userId(rs.getInt("user_id"))
                 .filmId(rs.getInt("film_id"))
-                .build();
+                .build();*/
+        return new Review(rs.getInt("review_id"),
+                rs.getString("content"),
+                rs.getBoolean("isPositive"),
+                rs.getInt("user_id"),
+                rs.getInt("film_id"));
     }
 
     @Override
@@ -133,6 +138,21 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public void revokeLikeReview(Integer reviewId, Integer userId) {
+        deleteLike(reviewId, userId);
+        String sqlUsefulUpd = "UPDATE reviews SET useful = useful - 1 WHERE review_id = ? AND user_id = ?";
+        jdbcTemplate.update(sqlUsefulUpd, reviewId, userId);
+        log.info("Пользователь id={} отозвал лайк с отзыва id={}.", reviewId, userId);
+    }
+
+    @Override
+    public void revokeDislikeReview(Integer reviewId, Integer userId) {
+        deleteLike(reviewId, userId);
+        String sqlUsefulUpd = "UPDATE reviews SET useful = useful + 1 WHERE review_id = ? AND user_id = ?";
+        jdbcTemplate.update(sqlUsefulUpd, reviewId, userId);
+        log.info("Пользователь id={} отозвал дизлайк с отзыва id={}.", reviewId, userId);
+    }
+
+    private void deleteLike(Integer reviewId, Integer userId) {
         String sqlQuery = "DELETE FROM review_likes WHERE review_id = ? AND user_id = ?";
         try {
             jdbcTemplate.update(sqlQuery, reviewId, userId);
@@ -140,11 +160,6 @@ public class ReviewDbStorage implements ReviewStorage {
             log.warn("Вызван некорректный отзыв или пользователь");
             throw new NotFoundException("Некорректный отзыв или пользователь");
         }
-    }
-
-    @Override
-    public void revokeDislikeReview(Integer reviewId, Integer userId) {
-        revokeLikeReview(reviewId, userId);
     }
 
 }
