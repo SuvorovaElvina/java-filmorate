@@ -23,7 +23,7 @@ class DirectorServiceTest {
     void createDirector() {
         Director director = directorService.createDirector(new Director(1, "director"));
 
-        assertThat(director).hasFieldOrPropertyWithValue("id", 3)
+        assertThat(director).hasFieldOrPropertyWithValue("id", 4)
                 .hasFieldOrPropertyWithValue("name", "director");
     }
 
@@ -46,19 +46,17 @@ class DirectorServiceTest {
 
     @Test
     void getDirectors() {
-        assertThat(directorService.getDirectors().size()).isEqualTo(0);
+        assertThat(directorService.getDirectors().size()).isEqualTo(1);
 
         directorService.createDirector(new Director(1, "director"));
 
-        assertThat(directorService.getDirectors().size()).isEqualTo(1);
+        assertThat(directorService.getDirectors().size()).isEqualTo(2);
     }
 
     @Test
     void getDirector() {
-        directorService.createDirector(new Director(1, "director"));
-
-        assertThat(directorService.getDirector(1))
-                .hasFieldOrPropertyWithValue("id", 1)
+        assertThat(directorService.getDirector(2))
+                .hasFieldOrPropertyWithValue("id", 2)
                 .hasFieldOrPropertyWithValue("name", "director");
     }
 

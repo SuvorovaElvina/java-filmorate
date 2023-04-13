@@ -56,3 +56,5 @@ INSERT INTO mpa (name) VALUES ('PG');
 INSERT INTO mpa (name) VALUES ('PG-13');
 INSERT INTO mpa (name) VALUES ('R');
 INSERT INTO mpa (name) VALUES ('NC-17');
+INSERT INTO users (id, email, login, name, birthday) VALUES (5, 'mail@mail.ru', 'login', 'name', CAST('2000-01-01' AS DATE));
+INSERT INTO films (id, name, description, release_date, duration, mpa_id) VALUES (5, 'nii', 'descriptions', CAST('1967-03-25' AS DATE), 100, 4);

@@ -27,7 +27,7 @@ class UserServiceTest {
         User user = userService.createUser(new User("gmail@mail.ru", "log",
                 "Nike", LocalDate.of(1999, 7, 21)));
 
-        assertThat(user).hasFieldOrPropertyWithValue("id", 5)
+        assertThat(user).hasFieldOrPropertyWithValue("id", 4)
                 .hasFieldOrPropertyWithValue("name", "Nike")
                 .hasFieldOrPropertyWithValue("email", "gmail@mail.ru")
                 .hasFieldOrPropertyWithValue("login", "log")
@@ -39,7 +39,7 @@ class UserServiceTest {
         User user = userService.createUser(new User("gmail@mail.ru", "log",
                 "", LocalDate.of(1999, 7, 21)));
 
-        assertThat(user).hasFieldOrPropertyWithValue("id", 4)
+        assertThat(user).hasFieldOrPropertyWithValue("id", 3)
                 .hasFieldOrPropertyWithValue("name", "log")
                 .hasFieldOrPropertyWithValue("email", "gmail@mail.ru")
                 .hasFieldOrPropertyWithValue("login", "log")
@@ -125,10 +125,8 @@ class UserServiceTest {
 
     @Test
     void removeFriend() {
-        userService.createUser(new User("gmail@mail.ru", "log",
-                null, LocalDate.of(1999, 7, 21)));
-        userService.addFriend(1,2);
-        userService.removeFriend(1,2);
+        userService.addFriend(1,5);
+        userService.removeFriend(1,5);
 
         assertThat(userService.getFriends(1).size()).isEqualTo(0);
     }
@@ -147,11 +145,11 @@ class UserServiceTest {
     void getCommonFriends() {
         userService.createUser(new User("gmail@mail.ru", "log",
                 null, LocalDate.of(1999, 7, 21)));
-        userService.addFriend(1,3);
-        userService.addFriend(2,3);
+        userService.addFriend(1,5);
+        userService.addFriend(2,5);
 
-        assertThat(userService.getCommonFriends(1,2).get(0).getId()).isEqualTo(3);
-        userService.removeFriend(1,3);
-        userService.removeFriend(2,3);
+        assertThat(userService.getCommonFriends(1,2).get(0).getId()).isEqualTo(5);
+        userService.removeFriend(1,5);
+        userService.removeFriend(2,5);
     }
 }
