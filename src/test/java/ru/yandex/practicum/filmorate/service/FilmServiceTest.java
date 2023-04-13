@@ -9,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.throwable.IncorrectCountException;
 import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 import ru.yandex.practicum.filmorate.throwable.ValidationException;
@@ -25,13 +24,12 @@ import static org.junit.Assert.assertThrows;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmServiceTest {
     private final FilmService filmService;
-    private final UserService userService;
     private final DirectorService directorService;
 
     @Test
     void createFilm() {
         Film film = filmService.createFilm(new Film(2, "name", "DEScription",
-                LocalDate.of(2000, 12,2), 120L, new Mpa(4,"R")));
+                LocalDate.of(2000, 12, 2), 120L, new Mpa(4, "R")));
 
         assertThat(film).hasFieldOrPropertyWithValue("id", 2)
                 .hasFieldOrPropertyWithValue("name", "name")
@@ -43,7 +41,7 @@ class FilmServiceTest {
     @Test
     void updateFilm() {
         Film film = filmService.updateFilm(new Film(5, "name", "description",
-                LocalDate.of(2000, 12,2), 100L, new Mpa(1,"G")));
+                LocalDate.of(2000, 12, 2), 100L, new Mpa(1, "G")));
 
         assertThat(film).hasFieldOrPropertyWithValue("id", 5)
                 .hasFieldOrPropertyWithValue("name", "name")
@@ -56,7 +54,7 @@ class FilmServiceTest {
     void updateFilmUnknown() {
         Throwable thrown = assertThrows(NotFoundException.class, () -> {
             filmService.updateFilm(new Film(9999, "name", "description",
-                    LocalDate.of(2000, 12,2), 120L, new Mpa(1,"G")));
+                    LocalDate.of(2000, 12, 2), 120L, new Mpa(1, "G")));
         });
 
         Assertions.assertNotNull(thrown.getMessage());
@@ -117,15 +115,15 @@ class FilmServiceTest {
     @Test
     void addLike() {
         filmService.createFilm(new Film(1, "name", "description",
-                LocalDate.of(2000, 12,2), 120L, new Mpa(1,"G")));
+                LocalDate.of(2000, 12, 2), 120L, new Mpa(1, "G")));
 
-        filmService.addLike(1,1);
+        filmService.addLike(1, 1);
         assertThat(filmService.getPopularFilms(1).get(0).getId()).isEqualTo(1);
     }
 
     @Test
     void removeLike() {
-        filmService.removeLike(1,1);
+        filmService.removeLike(1, 1);
 
         assertThat(filmService.getPopularFilms(1).get(0).getId()).isEqualTo(1);
     }
@@ -142,7 +140,7 @@ class FilmServiceTest {
     @Test
     void removeLikeUserIsUnknown() {
         Throwable thrown = assertThrows(NotFoundException.class, () -> {
-            filmService.removeLike(1,9999);
+            filmService.removeLike(1, 9999);
         });
 
         Assertions.assertNotNull(thrown.getMessage());
@@ -166,10 +164,10 @@ class FilmServiceTest {
     void getFilmsByYear() {
         Director director = directorService.createDirector(new Director(1, "director"));
         filmService.updateFilm(new Film(1, "name", "description",
-                LocalDate.of(2000, 12,2), 120L, new Mpa(1,"G"),
+                LocalDate.of(2000, 12, 2), 120L, new Mpa(1, "G"),
                 List.of(), List.of(director)));
         filmService.updateFilm(new Film(5, "name", "description",
-                LocalDate.of(1967, 12,2), 120L, new Mpa(4,"R"),
+                LocalDate.of(1967, 12, 2), 120L, new Mpa(4, "R"),
                 List.of(), List.of(director)));
 
         assertThat(filmService.getFilmsByYear(2).size()).isEqualTo(2);
@@ -181,10 +179,10 @@ class FilmServiceTest {
     void getFilmsByLikes() {
         Director director = directorService.createDirector(new Director(1, "Nik Kode"));
         filmService.updateFilm(new Film(1, "name", "description",
-                LocalDate.of(2000, 12,2), 120L, new Mpa(1,"G"),
+                LocalDate.of(2000, 12, 2), 120L, new Mpa(1, "G"),
                 List.of(), List.of(director)));
         filmService.updateFilm(new Film(5, "name", "description",
-                LocalDate.of(1967, 12,2), 120L, new Mpa(4,"R"),
+                LocalDate.of(1967, 12, 2), 120L, new Mpa(4, "R"),
                 List.of(), List.of(director)));
 
         assertThat(filmService.getFilmsByLikes(1).size()).isEqualTo(2);
@@ -214,7 +212,7 @@ class FilmServiceTest {
     void createFilmFailLogin() {
         Throwable thrown = assertThrows(ValidationException.class, () -> {
             filmService.createFilm(new Film(1, "name", "description",
-                    LocalDate.of(1800, 11,2), 120L, new Mpa(1,"G")));
+                    LocalDate.of(1800, 11, 2), 120L, new Mpa(1, "G")));
         });
 
         Assertions.assertNotNull(thrown.getMessage());
