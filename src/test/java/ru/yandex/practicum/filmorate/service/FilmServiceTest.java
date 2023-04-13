@@ -117,13 +117,13 @@ class FilmServiceTest {
         filmService.createFilm(new Film(1, "name", "description",
                 LocalDate.of(2000, 12, 2), 120L, new Mpa(1, "G")));
 
-        filmService.addLike(1, 1);
+        filmService.addLike(1, 5);
         assertThat(filmService.getPopularFilms(1).get(0).getId()).isEqualTo(1);
     }
 
     @Test
     void removeLike() {
-        filmService.removeLike(1, 1);
+        filmService.removeLike(1, 5);
 
         assertThat(filmService.getPopularFilms(1).get(0).getId()).isEqualTo(1);
     }
