@@ -24,12 +24,12 @@ public class FilmController {
     }
 
     @PostMapping
-    public Film create(@Valid @RequestBody Film film) {
+    public Film createFilm(@Valid @RequestBody Film film) {
         return filmService.createFilm(film);
     }
 
     @PutMapping
-    public Film update(@Valid @RequestBody Film film) {
+    public Film updateFilm(@Valid @RequestBody Film film) {
         return filmService.updateFilm(film);
     }
 
@@ -65,6 +65,10 @@ public class FilmController {
             return filmService.getFilmsByLikes(directorId);
         } else {
             throw new NotFoundException("Укажите сортировку по какому критерию: year, likes");
-        }
+     }
+    
+    @DeleteMapping("/{id}")
+    public void deleteFilmById(@PathVariable("id") int id) {
+        filmService.removeFilm(id);
     }
 }
