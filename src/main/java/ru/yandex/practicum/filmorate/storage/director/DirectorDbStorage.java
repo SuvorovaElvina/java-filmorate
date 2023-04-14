@@ -68,8 +68,8 @@ public class DirectorDbStorage implements DirectorStorage {
     public Optional<Director> getById(int id) {
         try {
             String sql = "select * from directors where id = ?";
-            List<Director> film = List.of(Objects.requireNonNull(jdbcTemplate.queryForObject(sql, this::mapRowToDirector, id)));
-            return Optional.ofNullable(film.get(0));
+            Director director = Objects.requireNonNull(jdbcTemplate.queryForObject(sql, this::mapRowToDirector, id));
+            return Optional.of(director);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
