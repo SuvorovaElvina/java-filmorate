@@ -9,6 +9,8 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 import ru.yandex.practicum.filmorate.throwable.ValidationException;
 
@@ -24,14 +26,18 @@ import java.util.Optional;
 public class ReviewDbStorage implements ReviewStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final UserStorage userStorage;
+    private final FilmStorage filmStorage;
 
     @Override
     public Review addReview(Review review) {
-        if (review.getFilmId() < 1 || review.getUserId() < 1) {
-            throw new NotFoundException("Передан некорректный id фильма или пользователя");
-        }
+        userStorage.getById(review.getUserId()).orElseThrow(() -> new NotFoundException("Такого пользователя нет в списке зарегистрированных."));
+        filmStorage.getById(review.getFilmId()).orElseThrow(() -> new NotFoundException("Такого фильма нет в списке зарегистрированных."));
         if (review.getIsPositive() == null) {
             throw new ValidationException("Некорректная характеристика отзыва");
+        }
+        if (review.getContent().isBlank() || review.getContent().isEmpty()) {
+            throw new ValidationException("Содержание отзыва не может быть пустым");
         }
         String sqlQuery = "INSERT INTO reviews (content, isPositive, user_id, film_id) VALUES (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -135,7 +141,8 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public void revokeLikeReview(Integer reviewId, Integer userId) {
-        deleteLike(reviewId, userId);
+        String sqLike = "DELETE FROM review_likes WHERE review_id = ? AND user_id = ? AND isLike = true";
+        deleteLike(reviewId, userId, sqLike);
         String sqlUsefulUpd = "UPDATE reviews SET useful = useful - 1 WHERE review_id = ?";
         jdbcTemplate.update(sqlUsefulUpd, reviewId);
         log.info("Пользователь id={} отозвал лайк с отзыва id={}.", reviewId, userId);
@@ -143,16 +150,20 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public void revokeDislikeReview(Integer reviewId, Integer userId) {
-        deleteLike(reviewId, userId);
+        String sqlDislike = "DELETE FROM review_likes WHERE review_id = ? AND user_id = ? AND isLike = false";
+        deleteLike(reviewId, userId, sqlDislike);
         String sqlUsefulUpd = "UPDATE reviews SET useful = useful + 1 WHERE review_id = ?";
         jdbcTemplate.update(sqlUsefulUpd, reviewId);
         log.info("Пользователь id={} отозвал дизлайк с отзыва id={}.", reviewId, userId);
     }
 
-    private void deleteLike(Integer reviewId, Integer userId) {
-        String sqlQuery = "DELETE FROM review_likes WHERE review_id = ? AND user_id = ?";
+    private void deleteLike(Integer reviewId, Integer userId, String sql) {
         try {
-            jdbcTemplate.update(sqlQuery, reviewId, userId);
+            int i = jdbcTemplate.update(sql, reviewId, userId);
+            if (i <= 0) {
+                log.warn("Удаление лайка/дизлайка невозможно");
+                throw new NotFoundException("Удаление лайка/дизлайка невозможно");
+            }
         } catch (DataAccessException e) {
             log.warn("Вызван некорректный отзыв или пользователь");
             throw new NotFoundException("Некорректный отзыв или пользователь");
