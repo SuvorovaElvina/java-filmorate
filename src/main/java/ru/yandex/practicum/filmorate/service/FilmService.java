@@ -95,6 +95,8 @@ public class FilmService {
         return filmStorage.getPopularFilms(count);
     }
 
+    public List<Film> getCommonFilms(Integer id, Integer otherId) {
+        return filmStorage.getCommonFilms(id, otherId);
     public List<Film> getFilmsByYear(int id) {
         if (directorStorage.getById(id).isEmpty()) {
             throw new NotFoundException("Режиссёра с таким id - не существует");
