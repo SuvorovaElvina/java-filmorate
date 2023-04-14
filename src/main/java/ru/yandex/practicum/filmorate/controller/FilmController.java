@@ -61,6 +61,8 @@ public class FilmController {
     public List<Film> getCommonFilms(@RequestParam(value = "userId", defaultValue = "0", required = true) String userId,
                                      @RequestParam(value = "friendId", defaultValue = "0", required = true) String friendId) {
         return filmService.getCommonFilms(Integer.parseInt(userId), Integer.parseInt(friendId));
+    }
+
     @GetMapping("/director/{directorId}")
     public List<Film> getFilmsByDirector(@PathVariable("directorId") int directorId, @RequestParam String sortBy) {
         if (sortBy.equals("year")) {
@@ -71,6 +73,7 @@ public class FilmController {
             throw new NotFoundException("Укажите сортировку по какому критерию: year, likes");
         }
     }
+
     @DeleteMapping("/{id}")
     public void deleteFilmById(@PathVariable("id") int id) {
         filmService.removeFilm(id);
