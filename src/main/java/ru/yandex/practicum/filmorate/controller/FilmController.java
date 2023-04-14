@@ -39,12 +39,17 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopularFilms(@RequestParam(required = false) String count) {
-        if (count == null) {
-            return filmService.getPopularFilms(10);
-        } else {
-            return filmService.getPopularFilms(Integer.parseInt(count));
-        }
+    public List<Film> getPopularFilms(@RequestParam(value = "count", defaultValue = "10", required = false) String count,
+                                      @RequestParam(value = "genreId", required = false) Integer genreId,
+                                      @RequestParam(value = "year", required = false) Integer year) {
+        return filmService.getPopularFilmsOnGenreAndYear((Integer.parseInt(count)), genreId, year);
+
+    }
+
+    @GetMapping("/search")
+    public List<Film> getFilmsBySearch(@RequestParam(value = "query", required = false) String query,
+                                       @RequestParam(value = "by", required = false) String by) {
+        return filmService.getFilmBySearch(query, by);
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -61,6 +66,8 @@ public class FilmController {
     public List<Film> getCommonFilms(@RequestParam(value = "userId", defaultValue = "0", required = true) String userId,
                                      @RequestParam(value = "friendId", defaultValue = "0", required = true) String friendId) {
         return filmService.getCommonFilms(Integer.parseInt(userId), Integer.parseInt(friendId));
+    }
+
     @GetMapping("/director/{directorId}")
     public List<Film> getFilmsByDirector(@PathVariable("directorId") int directorId, @RequestParam String sortBy) {
         if (sortBy.equals("year")) {
@@ -71,6 +78,7 @@ public class FilmController {
             throw new NotFoundException("Укажите сортировку по какому критерию: year, likes");
         }
     }
+
     @DeleteMapping("/{id}")
     public void deleteFilmById(@PathVariable("id") int id) {
         filmService.removeFilm(id);
