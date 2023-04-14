@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.throwable.IncorrectCountException;
@@ -24,6 +25,7 @@ public class FilmService {
     private final FilmStorage filmStorage;
     @Qualifier("userDbStorage")
     private final UserStorage userStorage;
+    private final DirectorStorage directorStorage;
 
     public Film createFilm(Film film) {
         validateFilm(film);
@@ -91,6 +93,20 @@ public class FilmService {
 
     public List<Film> getPopularFilms(Integer count) {
         return filmStorage.getPopularFilms(count);
+    }
+
+    public List<Film> getFilmsByYear(int id) {
+        if (directorStorage.getById(id).isEmpty()) {
+            throw new NotFoundException("Режиссёра с таким id - не существует");
+        }
+        return filmStorage.getFilmsByYear(id);
+    }
+
+    public List<Film> getFilmsByLikes(int id) {
+        if (directorStorage.getById(id).isEmpty()) {
+            throw new NotFoundException("Режиссёра с таким id - не существует");
+        }
+        return filmStorage.getFilmsByLikes(id);
     }
 
     private void validateFilm(Film film) {
