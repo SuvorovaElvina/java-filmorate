@@ -137,18 +137,6 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getPopularFilms(Integer count) {
-        String sql = "select f.*, r.name mpa_name, count(fl.film_id) likes_count from films f " +
-                "left join film_likes fl on f.id = fl.film_id " +
-                "left join mpa r on f.mpa_id = r.id " +
-                "group by f.id order by likes_count desc limit ?";
-        List<Film> all = jdbcTemplate.query(sql, this::mapRowToFilm, count);
-        genreStorage.getGenresForFilms(all);
-        directorStorage.getDirectorForFilms(all);
-        return all;
-    }
-
-    @Override
     public List<Film> getFilmsByYear(Integer id) {
         String sql = "select f.*, r.name mpa_name from films f " +
                 "left join film_directors fd on f.id = fd.film_id " +
@@ -184,6 +172,25 @@ public class FilmDbStorage implements FilmStorage {
                 new Mpa(resultSet.getInt("mpa_id"), resultSet.getString("mpa_name")));
     }
 
+    public List<Film> getCommonFilms(Integer id, Integer otherId) {
+        String sql = "SELECT f.*,r.name mpa_name, count(fl.film_id) likes_count FROM FILMS f " +
+                "LEFT JOIN FILM_LIKES fl ON fl.FILM_ID = f.ID " +
+                "LEFT JOIN USERS u ON u.ID = fl.USER_ID " +
+                "LEFT JOIN FRIENDS f2 ON u.ID = f2.USER_ID " +
+                "LEFT JOIN  MPA r on f.mpa_id = r.id " +
+                "WHERE fl.FILM_ID IN ( " +
+                "SELECT fl.FILM_ID FROM users u " +
+                "LEFT JOIN FILM_LIKES fl2 ON fl2.USER_ID = u.ID " +
+                "WHERE u.id = ? AND fl2.FILM_ID IN ( " +
+                "SELECT fl.FILM_ID FROM users u " +
+                "LEFT JOIN FILM_LIKES fl2 ON fl2.USER_ID = u.ID " +
+                "WHERE u.id = ?)) " +
+                "GROUP BY f.id " +
+                "ORDER BY likes_count";
+        log.info("Получен список общих фильмов пользователя {} и {}", id, otherId);
+        return jdbcTemplate.query(sql, this::mapRowToFilm, id, otherId);
+    }
+
     private void addGenre(Film film) {
         if (film.getGenres() != null) {
             String sql = "delete from film_genres where film_id = ?";
@@ -206,6 +213,23 @@ public class FilmDbStorage implements FilmStorage {
                         }
                     });
         }
+    }
+
+    @Override
+    public List<Film> getPopularFilmsOnGenreAndYear(Integer count, Integer genreId, Integer year) {
+        String sql = "select f.*, r.name mpa_name, count(fl.film_id) likes_count " +
+                "from films f " +
+                "left join film_likes fl on f.id = fl.film_id " +
+                "left join mpa r on f.mpa_id = r.id " +
+                "left join film_genres gen on f.ID  = gen.film_id " +
+                "where (? IS NULL OR extract(year from f.release_date) = ?) and (? IS NULL OR gen.genre_id = ?) " +
+                "group by f.id " +
+                "order by likes_count " +
+                "desc LIMIT ?";
+        List<Film> all = jdbcTemplate.query(sql, this::mapRowToFilm, year, year, genreId, genreId, count);
+        genreStorage.getGenresForFilms(all);
+        directorStorage.getDirectorForFilms(all);
+        return all;
     }
 
     private void addDirector(Film film) {

@@ -39,12 +39,11 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopularFilms(@RequestParam(required = false) String count) {
-        if (count == null) {
-            return filmService.getPopularFilms(10);
-        } else {
-            return filmService.getPopularFilms(Integer.parseInt(count));
-        }
+    public List<Film> getPopularFilms(@RequestParam(value = "count", defaultValue = "10", required = false) String count,
+                                      @RequestParam(value = "genreId", required = false) Integer genreId,
+                                      @RequestParam(value = "year", required = false) Integer year) {
+        return filmService.getPopularFilmsOnGenreAndYear((Integer.parseInt(count)), genreId, year);
+
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -55,6 +54,12 @@ public class FilmController {
     @DeleteMapping("/{id}/like/{userId}")
     public void removeLike(@PathVariable("id") int id, @PathVariable("userId") int userId) {
         filmService.removeLike(id, userId);
+    }
+
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam(value = "userId", defaultValue = "0", required = true) String userId,
+                                     @RequestParam(value = "friendId", defaultValue = "0", required = true) String friendId) {
+        return filmService.getCommonFilms(Integer.parseInt(userId), Integer.parseInt(friendId));
     }
 
     @GetMapping("/director/{directorId}")
@@ -72,4 +77,5 @@ public class FilmController {
     public void deleteFilmById(@PathVariable("id") int id) {
         filmService.removeFilm(id);
     }
+
 }
