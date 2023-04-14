@@ -41,7 +41,7 @@ public class DirectorDbStorage implements DirectorStorage {
         String sql = "delete from directors where id = ?";
         int updateCount = jdbcTemplate.update(sql, id);
         if (updateCount <= 0) {
-            throw new NotFoundException("Режиссёра не существует. Удаление не возможно.");
+            throw new NotFoundException("Режиссёра не существует. Удаление невозможно.");
         }
         log.info("Режиссёр удалён");
     }

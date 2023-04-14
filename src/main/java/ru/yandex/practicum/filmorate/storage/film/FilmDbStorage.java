@@ -58,7 +58,7 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "delete from films where id = ?";
         int updateCount = jdbcTemplate.update(sql, id);
         if (updateCount <= 0) {
-            throw new NotFoundException("Фильма не существует. Удаление не возможно.");
+            throw new NotFoundException("Фильма не существует. Удаление невозможно.");
         }
         log.info("Фильм удалён");
     }
