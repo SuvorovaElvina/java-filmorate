@@ -55,6 +55,18 @@ public class FilmService {
         }
     }
 
+    public void removeFilm(int id) {
+        Optional<Film> filmOpt = filmStorage.getById(id);
+        if (filmOpt.isEmpty()) {
+            if (id < 0) {
+                throw new IncorrectCountException("id не должно быть меньше 0.");
+            } else {
+                throw new NotFoundException("Фильм с указанный id - не существует.");
+            }
+        }
+        filmStorage.remove(id);
+    }
+
     public void addLike(Integer filmId, Integer userId) {
         if (filmStorage.getById(filmId).isPresent()) {
             if (userStorage.getById(userId).isPresent()) {
