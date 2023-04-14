@@ -8,9 +8,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
 import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final GenreDbStorage genreStorage;
+    private final DirectorDbStorage directorStorage;
 
     @Override
     public Film add(Film film) {
@@ -45,6 +48,7 @@ public class FilmDbStorage implements FilmStorage {
         }, keyHolder);
         film.setId(keyHolder.getKeyAs(Integer.class));
         addGenre(film);
+        addDirector(film);
         log.info("Фильм добавлен");
         return film;
     }
@@ -54,7 +58,7 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "delete from films where id = ?";
         int updateCount = jdbcTemplate.update(sql, id);
         if (updateCount <= 0) {
-            throw new NotFoundException("Фильма не существует. Удаление не возможно.");
+            throw new NotFoundException("Фильма не существует. Удаление невозможно.");
         }
         log.info("Фильм удалён");
     }
@@ -76,6 +80,7 @@ public class FilmDbStorage implements FilmStorage {
             return Optional.empty();
         } else {
             addGenre(film);
+            addDirector(film);
             log.info("Фильм изменён");
             return Optional.of(film);
         }
@@ -87,6 +92,7 @@ public class FilmDbStorage implements FilmStorage {
                 "join mpa r on f.mpa_id = r.id";
         List<Film> all = jdbcTemplate.query(sql, this::mapRowToFilm);
         genreStorage.getGenresForFilms(all);
+        directorStorage.getDirectorForFilms(all);
         return all;
     }
 
@@ -98,6 +104,7 @@ public class FilmDbStorage implements FilmStorage {
                     "where f.id = ?";
             List<Film> film = List.of(Objects.requireNonNull(jdbcTemplate.queryForObject(sql, this::mapRowToFilm, id)));
             genreStorage.getGenresForFilms(film);
+            directorStorage.getDirectorForFilms(film);
             return Optional.ofNullable(film.get(0));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
@@ -137,6 +144,34 @@ public class FilmDbStorage implements FilmStorage {
                 "group by f.id order by likes_count desc limit ?";
         List<Film> all = jdbcTemplate.query(sql, this::mapRowToFilm, count);
         genreStorage.getGenresForFilms(all);
+        directorStorage.getDirectorForFilms(all);
+        return all;
+    }
+
+    @Override
+    public List<Film> getFilmsByYear(Integer id) {
+        String sql = "select f.*, r.name mpa_name from films f " +
+                "left join film_directors fd on f.id = fd.film_id " +
+                "left join mpa r on f.mpa_id = r.id " +
+                "where fd.director_id = ? " +
+                "group by f.id order by f.release_date";
+        List<Film> all = jdbcTemplate.query(sql, this::mapRowToFilm, id);
+        genreStorage.getGenresForFilms(all);
+        directorStorage.getDirectorForFilms(all);
+        return all;
+    }
+
+    @Override
+    public List<Film> getFilmsByLikes(Integer id) {
+        String sql = "select f.*, r.name mpa_name, count(fl.film_id) likes_count from films f " +
+                "left join film_likes fl on f.id = fl.film_id " +
+                "left join film_directors fd on f.id = fd.film_id " +
+                "left join mpa r on f.mpa_id = r.id " +
+                "where fd.director_id = ? " +
+                "group by f.id order by likes_count desc";
+        List<Film> all = jdbcTemplate.query(sql, this::mapRowToFilm, id);
+        genreStorage.getGenresForFilms(all);
+        directorStorage.getDirectorForFilms(all);
         return all;
     }
 
@@ -187,6 +222,30 @@ public class FilmDbStorage implements FilmStorage {
 
                         public int getBatchSize() {
                             return genres.size();
+                        }
+                    });
+        }
+    }
+
+    private void addDirector(Film film) {
+        if (film.getDirectors() != null) {
+            String sql = "delete from film_directors where film_id = ?";
+            jdbcTemplate.update(sql, film.getId());
+            log.info("Режиссёры фильма удалёны.");
+
+            List<Director> directors = film.getDirectors().stream()
+                    .distinct()
+                    .collect(Collectors.toList());
+            film.setDirectors(directors);
+            this.jdbcTemplate.batchUpdate("insert into film_directors (film_id, director_id) values(?,?)",
+                    new BatchPreparedStatementSetter() {
+                        public void setValues(PreparedStatement stmt, int i) throws SQLException {
+                            stmt.setInt(1, film.getId());
+                            stmt.setInt(2, directors.get(i).getId());
+                        }
+
+                        public int getBatchSize() {
+                            return directors.size();
                         }
                     });
         }
