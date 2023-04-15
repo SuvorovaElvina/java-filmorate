@@ -38,9 +38,9 @@ public class ReviewService {
             return reviewOptional.get();
         } else {
             if (reviewId < 0) {
-                throw new IncorrectCountException("id не должно быть меньше 0.");
+                throw new IncorrectCountException("id не должно быть меньше 0");
             } else {
-                throw new NotFoundException("Отзыв с указанным id - не существует.");
+                throw new NotFoundException("Отзыв с указанным id - не существует");
             }
         }
     }
