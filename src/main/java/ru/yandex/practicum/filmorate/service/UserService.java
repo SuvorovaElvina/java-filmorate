@@ -107,7 +107,7 @@ public class UserService {
         films = new ArrayList<>();
         if (userRatings == null) return films;
         for (Film film: userRatings.keySet()) {
-            if ((userRatings.get(film)>0)&&(!userFilms.contains(film)))
+            if ((userRatings.get(film) > 0) && (!userFilms.contains(film)))
                 films.add(film);
         }
         return films;

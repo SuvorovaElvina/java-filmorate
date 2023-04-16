@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -67,6 +68,7 @@ public class SlopeOne {
                         uPred.put(k, uPred.get(k) + finalValue);
                         uFreq.put(k, uFreq.get(k) + freq.get(k).get(j).intValue());
                     } catch (NullPointerException e1) {
+                        throw new NotFoundException("empty data");
                     }
                 }
             }
