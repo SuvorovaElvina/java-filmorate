@@ -96,7 +96,6 @@ public class UserService {
     }
 
     public List<Film> getRecommedations(int userId) {
-
         User user = getUser(userId);
         List<Film> films = filmsStorage.getAll();
         List<Film> userFilms = filmsStorage.getLikes(userId, films);
