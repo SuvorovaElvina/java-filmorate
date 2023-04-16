@@ -40,8 +40,8 @@ public class Film {
         this.mpa = mpa;
         this.genres = genres;
     }
-    private List<Director> directors = new ArrayList<>();
 
+    private List<Director> directors = new ArrayList<>();
 
     public Film(Integer id, String name, String description, LocalDate releaseDate, Long duration, Mpa mpa) {
         this.id = id;
