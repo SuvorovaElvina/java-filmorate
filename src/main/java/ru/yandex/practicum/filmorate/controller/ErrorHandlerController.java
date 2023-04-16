@@ -48,7 +48,11 @@ public class ErrorHandlerController {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, String> handleError(final RuntimeException e) {
-        return Map.of("error", "Произошла ошибка!");
+
+     public Map<String, String> handleError(final RuntimeException e) {
+        return Map.of(
+                "error", "Произошла ошибка!",
+                "errorMessage", e.getMessage()
+        );
     }
 }
