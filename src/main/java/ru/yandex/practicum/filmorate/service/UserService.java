@@ -53,6 +53,18 @@ public class UserService {
         }
     }
 
+    public void removeUser(int id) {
+        Optional<User> userOpt = userStorage.getById(id);
+        if (userOpt.isEmpty()) {
+            if (id < 0) {
+                throw new IncorrectCountException("id не должно быть меньше 0.");
+            } else {
+                throw new NotFoundException("Пользователя с указанным id - не существует.");
+            }
+        }
+        userStorage.remove(id);
+    }
+
     public void addFriend(Integer userId, Integer friendId) {
         getUser(userId);
         getUser(friendId);
@@ -66,6 +78,14 @@ public class UserService {
     }
 
     public List<User> getFriends(Integer userId) {
+        Optional<User> userOpt = userStorage.getById(userId);
+        if (userOpt.isEmpty()) {
+            if (userId < 0) {
+                throw new IncorrectCountException("id не должно быть меньше 0.");
+            } else {
+                throw new NotFoundException("Фильм с указанный id - не существует.");
+            }
+        }
         return userStorage.getFriends(userId);
     }
 
