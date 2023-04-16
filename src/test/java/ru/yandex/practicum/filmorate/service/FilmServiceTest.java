@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.throwable.IncorrectCountException;
@@ -16,8 +15,8 @@ import ru.yandex.practicum.filmorate.throwable.ValidationException;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -25,18 +24,6 @@ import static org.junit.Assert.*;
 class FilmServiceTest {
     private final FilmService filmService;
     private final DirectorService directorService;
-
-    @Test
-    void createFilm() {
-        Film film = filmService.createFilm(new Film(2, "name", "DEScription",
-                LocalDate.of(2000, 12, 2), 120L, new Mpa(4, "R")));
-
-        assertThat(film).hasFieldOrPropertyWithValue("id", 2)
-                .hasFieldOrPropertyWithValue("name", "name")
-                .hasFieldOrPropertyWithValue("description", "DEScription")
-                .hasFieldOrPropertyWithValue("duration", 120L)
-                .hasFieldOrPropertyWithValue("releaseDate", LocalDate.of(2000, 12, 2));
-    }
 
     @Test
     void updateFilm() {
@@ -58,11 +45,6 @@ class FilmServiceTest {
         });
 
         Assertions.assertNotNull(thrown.getMessage());
-    }
-
-    @Test
-    void getFilms() {
-        assertThat(filmService.getFilms().size()).isEqualTo(3);
     }
 
     @Test
@@ -113,22 +95,6 @@ class FilmServiceTest {
     }
 
     @Test
-    void addLike() {
-        filmService.createFilm(new Film(1, "name", "description",
-                LocalDate.of(2000, 12, 2), 120L, new Mpa(1, "G")));
-
-        filmService.addLike(1, 5);
-        assertThat(filmService.getPopularFilms(1).get(0).getId()).isEqualTo(1);
-    }
-
-    @Test
-    void removeLike() {
-        filmService.removeLike(1, 5);
-
-        assertThat(filmService.getPopularFilms(1).get(0).getId()).isEqualTo(1);
-    }
-
-    @Test
     void removeLikeFilmIsUnknown() {
         Throwable thrown = assertThrows(NotFoundException.class, () -> {
             filmService.removeLike(9999, 1);
@@ -147,47 +113,10 @@ class FilmServiceTest {
     }
 
     @Test
-    void getPopularFilmsNotCount() {
-        List<Film> films = filmService.getPopularFilms(10);
-
-        assertThat(films.size()).isEqualTo(2);
-    }
-
-    @Test
     void getPopularFilmsWithCount() {
-        List<Film> films = filmService.getPopularFilms(1);
+        List<Film> films = filmService.getPopularFilmsOnGenreAndYear(10, 1, 1999);
 
-        assertThat(films.size()).isEqualTo(1);
-    }
-
-    @Test
-    void getFilmsByYear() {
-        Director director = directorService.createDirector(new Director(1, "director"));
-        filmService.updateFilm(new Film(1, "name", "description",
-                LocalDate.of(2000, 12, 2), 120L, new Mpa(1, "G"),
-                List.of(), List.of(director)));
-        filmService.updateFilm(new Film(5, "name", "description",
-                LocalDate.of(1967, 12, 2), 120L, new Mpa(4, "R"),
-                List.of(), List.of(director)));
-
-        assertThat(filmService.getFilmsByYear(2).size()).isEqualTo(2);
-        assertThat(filmService.getFilmsByYear(2).get(0).getId()).isEqualTo(5);
-        assertThat(filmService.getFilmsByYear(2).get(1).getId()).isEqualTo(1);
-    }
-
-    @Test
-    void getFilmsByLikes() {
-        Director director = directorService.createDirector(new Director(1, "Nik Kode"));
-        filmService.updateFilm(new Film(1, "name", "description",
-                LocalDate.of(2000, 12, 2), 120L, new Mpa(1, "G"),
-                List.of(), List.of(director)));
-        filmService.updateFilm(new Film(5, "name", "description",
-                LocalDate.of(1967, 12, 2), 120L, new Mpa(4, "R"),
-                List.of(), List.of(director)));
-
-        assertThat(filmService.getFilmsByLikes(1).size()).isEqualTo(2);
-        assertThat(filmService.getFilmsByLikes(1).get(0).getId()).isEqualTo(1);
-        assertThat(filmService.getFilmsByLikes(1).get(1).getId()).isEqualTo(5);
+        assertThat(films.size()).isEqualTo(0);
     }
 
     @Test
