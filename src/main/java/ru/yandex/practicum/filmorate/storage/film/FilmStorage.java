@@ -25,7 +25,14 @@ public interface FilmStorage {
     void removeLike(Integer filmId, Integer userId);
 
     List<Film> getPopularFilms(Integer count);
-     List<Film> getLikes(int userId, List<Film> films);
-     Map<User, HashMap<Film, Double>> getRecommendationData(List<User> users, List<Film> films);
 
-    }
+    List<Film> getLikes(int userId, List<Film> films);
+    
+    Map<User, HashMap<Film, Double>> getRecommendationData(List<User> users, List<Film> films);
+
+    List<Film> getCommonFilms(Integer id, Integer otherId);
+    
+    List<Film> getFilmsByYear(Integer count);
+
+    List<Film> getFilmsByLikes(Integer count);
+}
