@@ -46,7 +46,7 @@ public class ErrorHandlerController {
         );
     }
 
-     @ExceptionHandler
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 
      public Map<String, String> handleError(final RuntimeException e) {
