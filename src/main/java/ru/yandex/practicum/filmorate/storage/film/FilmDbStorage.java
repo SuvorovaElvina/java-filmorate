@@ -8,10 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
 import ru.yandex.practicum.filmorate.throwable.NotFoundException;
@@ -20,9 +17,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component("filmDbStorage")
@@ -230,6 +225,36 @@ public class FilmDbStorage implements FilmStorage {
         genreStorage.getGenresForFilms(all);
         directorStorage.getDirectorForFilms(all);
         return all;
+        
+    public Map<User, HashMap<Film, Double>> getRecommendationData(List<User> users, List<Film> films) {
+
+        Map<User, HashMap<Film, Double>> inputData = new HashMap<>();
+        for (User user : users) {
+            List<Film> filmsUsers = getLikes(user.getId(), films);
+            HashMap<Film, Double> data = new HashMap<>();
+            for (Film film : filmsUsers) {
+                data.put(film, Double.valueOf(1.0));
+            }
+            inputData.put(user, data);
+        }
+        return inputData;
+    }
+
+    public List<Film> getLikes(int userId, List<Film> films) {
+
+        String query = "SELECT film_id FROM film_likes WHERE user_id = ?";
+        List<Film> likedFilms = new ArrayList<>();
+        List<Map<String, Object>> resultList = jdbcTemplate.queryForList(query, userId);
+        for (Map<String, Object> result : resultList) {
+            int filmId = (Integer) result.get("film_id");
+            for (Film film : films) {
+                if (film.getId() == filmId) {
+                    likedFilms.add(film);
+                    break;
+                }
+            }
+        }
+        return likedFilms;
     }
 
     private void addDirector(Film film) {
@@ -254,5 +279,6 @@ public class FilmDbStorage implements FilmStorage {
                         }
                     });
         }
+
     }
 }
