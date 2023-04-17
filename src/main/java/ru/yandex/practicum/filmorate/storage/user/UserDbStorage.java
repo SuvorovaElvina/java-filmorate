@@ -46,7 +46,7 @@ public class UserDbStorage implements UserStorage {
         String sql = "delete from users where id = ?";
         int updateCount = jdbcTemplate.update(sql, id);
         if (updateCount <= 0) {
-            throw new NotFoundException("Фильма не существует. Удаление не возможно.");
+            throw new NotFoundException("Фильма не существует. Удаление невозможно.");
         }
         log.info("Пользователь удалён");
     }
