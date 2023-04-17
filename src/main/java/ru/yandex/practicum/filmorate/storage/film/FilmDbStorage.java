@@ -167,6 +167,7 @@ public class FilmDbStorage implements FilmStorage {
                 new Mpa(resultSet.getInt("mpa_id"), resultSet.getString("mpa_name")));
     }
 
+    @Override
     public List<Film> getCommonFilms(Integer id, Integer otherId) {
         String sql = "SELECT f.*,r.name mpa_name, count(fl.film_id) likes_count FROM FILMS f " +
                 "LEFT JOIN FILM_LIKES fl ON fl.FILM_ID = f.ID " +
@@ -225,7 +226,8 @@ public class FilmDbStorage implements FilmStorage {
         genreStorage.getGenresForFilms(all);
         directorStorage.getDirectorForFilms(all);
         return all;
-        
+    }
+
     public Map<User, HashMap<Film, Double>> getRecommendationData(List<User> users, List<Film> films) {
 
         Map<User, HashMap<Film, Double>> inputData = new HashMap<>();
@@ -233,7 +235,7 @@ public class FilmDbStorage implements FilmStorage {
             List<Film> filmsUsers = getLikes(user.getId(), films);
             HashMap<Film, Double> data = new HashMap<>();
             for (Film film : filmsUsers) {
-                data.put(film, Double.valueOf(1.0));
+                data.put(film, 1.0);
             }
             inputData.put(user, data);
         }
