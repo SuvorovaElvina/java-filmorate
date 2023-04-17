@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.throwable.IncorrectCountException;
@@ -24,6 +25,7 @@ public class FilmService {
     private final FilmStorage filmStorage;
     @Qualifier("userDbStorage")
     private final UserStorage userStorage;
+    private final DirectorStorage directorStorage;
 
     public Film createFilm(Film film) {
         validateFilm(film);
@@ -53,6 +55,18 @@ public class FilmService {
         }
     }
 
+    public void removeFilm(int id) {
+        Optional<Film> filmOpt = filmStorage.getById(id);
+        if (filmOpt.isEmpty()) {
+            if (id < 0) {
+                throw new IncorrectCountException("id не должно быть меньше 0.");
+            } else {
+                throw new NotFoundException("Фильм с указанный id - не существует.");
+            }
+        }
+        filmStorage.remove(id);
+    }
+
     public void addLike(Integer filmId, Integer userId) {
         if (filmStorage.getById(filmId).isPresent()) {
             if (userStorage.getById(userId).isPresent()) {
@@ -77,8 +91,26 @@ public class FilmService {
         filmStorage.removeLike(filmId, userId);
     }
 
-    public List<Film> getPopularFilms(Integer count) {
-        return filmStorage.getPopularFilms(count);
+    public List<Film> getPopularFilmsOnGenreAndYear(Integer count, Integer genreId, Integer year) {
+        return filmStorage.getPopularFilmsOnGenreAndYear(count, genreId, year);
+    }
+
+    public List<Film> getCommonFilms(Integer id, Integer otherId) {
+        return filmStorage.getCommonFilms(id, otherId);
+    }
+
+    public List<Film> getFilmsByYear(int id) {
+        if (directorStorage.getById(id).isEmpty()) {
+            throw new NotFoundException("Режиссёра с таким id - не существует");
+        }
+        return filmStorage.getFilmsByYear(id);
+    }
+
+    public List<Film> getFilmsByLikes(int id) {
+        if (directorStorage.getById(id).isEmpty()) {
+            throw new NotFoundException("Режиссёра с таким id - не существует");
+        }
+        return filmStorage.getFilmsByLikes(id);
     }
 
     private void validateFilm(Film film) {
