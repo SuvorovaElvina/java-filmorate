@@ -163,7 +163,7 @@ public class FilmDbStorage implements FilmStorage {
                 "LEFT JOIN DIRECTORS d ON d.ID = fd.DIRECTOR_ID " +
                 "WHERE (lower(f.NAME) LIKE lower(?)) " +
                 "group by f.id order by likes_count desc";
-        List<Film> all = jdbcTemplate.query(sql, this::mapRowToFilm,"%"+title+"%");
+        List<Film> all = jdbcTemplate.query(sql, this::mapRowToFilm,"%" + title + "%");
         genreStorage.getGenresForFilms(all);
         directorStorage.getDirectorForFilms(all);
         return all;
@@ -178,7 +178,7 @@ public class FilmDbStorage implements FilmStorage {
                 "LEFT JOIN DIRECTORS d ON d.ID = fd.DIRECTOR_ID " +
                 "WHERE (lower(d.NAME) LIKE lower(?)) " +
                 "group by f.id order by likes_count desc";
-        List<Film> all = jdbcTemplate.query(sql, this::mapRowToFilm, "%"+name+"%");
+        List<Film> all = jdbcTemplate.query(sql, this::mapRowToFilm, "%" + name + "%");
         genreStorage.getGenresForFilms(all);
         directorStorage.getDirectorForFilms(all);
         return all;
@@ -193,7 +193,7 @@ public class FilmDbStorage implements FilmStorage {
                 "LEFT JOIN DIRECTORS d ON d.ID = fd.DIRECTOR_ID " +
                 "WHERE (lower(f.NAME) LIKE lower(?)) OR (lower(d.NAME) LIKE lower(?)) " +
                 "group by f.id order by likes_count DESC";
-        List<Film> all = jdbcTemplate.query(sql, this::mapRowToFilm, "%"+dirfilname+"%","%"+dirfilname+"%");
+        List<Film> all = jdbcTemplate.query(sql, this::mapRowToFilm, "%" + dirfilname + "%","%" + dirfilname + "%");
         genreStorage.getGenresForFilms(all);
         directorStorage.getDirectorForFilms(all);
         return all;
