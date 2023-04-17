@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +16,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Film {
     private Integer id;
     @NotBlank(message = "Имя не должно быть пустым.")
@@ -38,6 +40,7 @@ public class Film {
         this.mpa = mpa;
         this.genres = genres;
     }
+
     private List<Director> directors = new ArrayList<>();
 
     public Film(Integer id, String name, String description, LocalDate releaseDate, Long duration, Mpa mpa) {

@@ -50,6 +50,7 @@ public class FilmController {
     public List<Film> getFilmsBySearch(@RequestParam(value = "query", required = false) String query,
                                        @RequestParam(value = "by", required = false) String by) {
         return filmService.getFilmBySearch(query, by);
+
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -83,4 +84,5 @@ public class FilmController {
     public void deleteFilmById(@PathVariable("id") int id) {
         filmService.removeFilm(id);
     }
+
 }

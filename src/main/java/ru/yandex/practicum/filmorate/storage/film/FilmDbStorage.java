@@ -8,10 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
 import ru.yandex.practicum.filmorate.throwable.NotFoundException;
@@ -20,9 +17,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component("filmDbStorage")
@@ -236,6 +231,7 @@ public class FilmDbStorage implements FilmStorage {
                 new Mpa(resultSet.getInt("mpa_id"), resultSet.getString("mpa_name")));
     }
 
+    @Override
     public List<Film> getCommonFilms(Integer id, Integer otherId) {
         String sql = "SELECT f.*,r.name mpa_name, count(fl.film_id) likes_count FROM FILMS f " +
                 "LEFT JOIN FILM_LIKES fl ON fl.FILM_ID = f.ID " +
@@ -279,6 +275,54 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
+    @Override
+    public List<Film> getPopularFilmsOnGenreAndYear(Integer count, Integer genreId, Integer year) {
+        String sql = "select f.*, r.name mpa_name, count(fl.film_id) likes_count " +
+                "from films f " +
+                "left join film_likes fl on f.id = fl.film_id " +
+                "left join mpa r on f.mpa_id = r.id " +
+                "left join film_genres gen on f.ID  = gen.film_id " +
+                "where (? IS NULL OR extract(year from f.release_date) = ?) and (? IS NULL OR gen.genre_id = ?) " +
+                "group by f.id " +
+                "order by likes_count " +
+                "desc LIMIT ?";
+        List<Film> all = jdbcTemplate.query(sql, this::mapRowToFilm, year, year, genreId, genreId, count);
+        genreStorage.getGenresForFilms(all);
+        directorStorage.getDirectorForFilms(all);
+        return all;
+    }
+
+    public Map<User, HashMap<Film, Double>> getRecommendationData(List<User> users, List<Film> films) {
+
+        Map<User, HashMap<Film, Double>> inputData = new HashMap<>();
+        for (User user : users) {
+            List<Film> filmsUsers = getLikes(user.getId(), films);
+            HashMap<Film, Double> data = new HashMap<>();
+            for (Film film : filmsUsers) {
+                data.put(film, 1.0);
+            }
+            inputData.put(user, data);
+        }
+        return inputData;
+    }
+
+    public List<Film> getLikes(int userId, List<Film> films) {
+
+        String query = "SELECT film_id FROM film_likes WHERE user_id = ?";
+        List<Film> likedFilms = new ArrayList<>();
+        List<Map<String, Object>> resultList = jdbcTemplate.queryForList(query, userId);
+        for (Map<String, Object> result : resultList) {
+            int filmId = (Integer) result.get("film_id");
+            for (Film film : films) {
+                if (film.getId() == filmId) {
+                    likedFilms.add(film);
+                    break;
+                }
+            }
+        }
+        return likedFilms;
+    }
+
     private void addDirector(Film film) {
         if (film.getDirectors() != null) {
             String sql = "delete from film_directors where film_id = ?";
@@ -301,5 +345,6 @@ public class FilmDbStorage implements FilmStorage {
                         }
                     });
         }
+
     }
 }
