@@ -24,9 +24,9 @@ public interface FilmStorage {
 
     void removeLike(Integer filmId, Integer userId);
 
-    List<Film> getCommonFilms(Integer id, Integer otherId);
-
     List<Film> getPopularFilmsOnGenreAndYear(Integer count, Integer genreId, Integer year);
+
+    List<Film> getCommonFilms(Integer id, Integer otherId);
 
     List<Film> getLikes(int userId, List<Film> films);
 
@@ -35,4 +35,10 @@ public interface FilmStorage {
     List<Film> getFilmsByYear(Integer count);
 
     List<Film> getFilmsByLikes(Integer count);
+
+    List<Film> searchFilmByTitle(String title);
+
+    List<Film> searchFilmByDirectorName(String title);
+
+    List<Film> searchFilmByDirectorNameAndTitleFilm(String dirfilname);
 }

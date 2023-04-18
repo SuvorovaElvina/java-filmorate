@@ -113,6 +113,25 @@ public class FilmService {
         return filmStorage.getFilmsByLikes(id);
     }
 
+    public List<Film> getFilmBySearch(String query, String by) {
+        String querys = query.toLowerCase();
+        List<Film> searchfilms;
+        switch (by) {
+            case ("director"):
+                searchfilms = filmStorage.searchFilmByDirectorName(querys);
+                return searchfilms;
+            case ("title"):
+                searchfilms = filmStorage.searchFilmByTitle(querys);
+                return searchfilms;
+            case ("director,title"):
+            case ("title,director"):
+                searchfilms = filmStorage.searchFilmByDirectorNameAndTitleFilm(querys);
+                return searchfilms;
+            default:
+                return filmStorage.getAll();
+        }
+    }
+
     private void validateFilm(Film film) {
         if (film.getReleaseDate().isBefore(AFTER_RELEASE_DATE)) {
             throw new ValidationException("Фильм должен быть не раньше " + AFTER_RELEASE_DATE.getDayOfMonth()

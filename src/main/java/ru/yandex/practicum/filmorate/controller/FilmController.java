@@ -46,6 +46,13 @@ public class FilmController {
 
     }
 
+    @GetMapping("/search")
+    public List<Film> getFilmsBySearch(@RequestParam(value = "query", required = false) String query,
+                                       @RequestParam(value = "by", required = false) String by) {
+        return filmService.getFilmBySearch(query, by);
+
+    }
+
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable("id") int id, @PathVariable("userId") int userId) {
         filmService.addLike(id, userId);

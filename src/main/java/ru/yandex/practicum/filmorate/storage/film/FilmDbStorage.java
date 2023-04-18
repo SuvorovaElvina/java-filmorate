@@ -131,6 +131,70 @@ public class FilmDbStorage implements FilmStorage {
         log.info("Лайк от пользователя - {} удалён.", userId);
     }
 
+
+    @Override
+    public List<Film> getPopularFilmsOnGenreAndYear(Integer count, Integer genreId, Integer year) {
+        String sql = "select f.*, r.name mpa_name, count(fl.film_id) likes_count " +
+                "from films f " +
+                "left join film_likes fl on f.id = fl.film_id " +
+                "left join mpa r on f.mpa_id = r.id " +
+                "left join film_genres gen on f.ID  = gen.film_id " +
+                "where (? IS NULL OR extract(year from f.release_date) = ?) and (? IS NULL OR gen.genre_id = ?) " +
+                "group by f.id " +
+                "order by likes_count " +
+                "desc LIMIT ?";
+        List<Film> all = jdbcTemplate.query(sql, this::mapRowToFilm, year, year, genreId, genreId, count);
+        genreStorage.getGenresForFilms(all);
+        directorStorage.getDirectorForFilms(all);
+        return all;
+    }
+
+    @Override
+    public List<Film> searchFilmByTitle(String title) {
+        String sql = "select f.*, r.name mpa_name, count(fl.film_id) likes_count from films f " +
+                "left join film_likes fl on f.id = fl.film_id " +
+                "left join mpa r on f.mpa_id = r.id " +
+                "LEFT JOIN FILM_DIRECTORS fd ON fd.FILM_ID = f.ID " +
+                "LEFT JOIN DIRECTORS d ON d.ID = fd.DIRECTOR_ID " +
+                "WHERE (lower(f.NAME) LIKE lower(?)) " +
+                "group by f.id order by likes_count desc";
+        List<Film> all = jdbcTemplate.query(sql, this::mapRowToFilm,"%" + title + "%");
+        genreStorage.getGenresForFilms(all);
+        directorStorage.getDirectorForFilms(all);
+        return all;
+    }
+
+    @Override
+    public List<Film> searchFilmByDirectorName(String name) {
+        String sql = "select f.*, r.name mpa_name, count(fl.film_id) likes_count from films f " +
+                "left join film_likes fl on f.id = fl.film_id " +
+                "left join mpa r on f.mpa_id = r.id " +
+                "LEFT JOIN FILM_DIRECTORS fd ON fd.FILM_ID = f.ID " +
+                "LEFT JOIN DIRECTORS d ON d.ID = fd.DIRECTOR_ID " +
+                "WHERE (lower(d.NAME) LIKE lower(?)) " +
+                "group by f.id order by likes_count desc";
+        List<Film> all = jdbcTemplate.query(sql, this::mapRowToFilm, "%" + name + "%");
+        genreStorage.getGenresForFilms(all);
+        directorStorage.getDirectorForFilms(all);
+        return all;
+    }
+
+    @Override
+    public List<Film> searchFilmByDirectorNameAndTitleFilm(String dirfilname) {
+        String sql = "select f.*, r.name mpa_name, count(fl.film_id) likes_count from films f " +
+                "left join film_likes fl on f.id = fl.film_id " +
+                "left join mpa r on f.mpa_id = r.id " +
+                "LEFT JOIN FILM_DIRECTORS fd ON fd.FILM_ID = f.ID " +
+                "LEFT JOIN DIRECTORS d ON d.ID = fd.DIRECTOR_ID " +
+                "WHERE (lower(f.NAME) LIKE lower(?)) OR (lower(d.NAME) LIKE lower(?)) " +
+                "group by f.id order by likes_count DESC";
+        List<Film> all = jdbcTemplate.query(sql, this::mapRowToFilm, "%" + dirfilname + "%","%" + dirfilname + "%");
+        genreStorage.getGenresForFilms(all);
+        directorStorage.getDirectorForFilms(all);
+        return all;
+    }
+
+
     @Override
     public List<Film> getFilmsByYear(Integer id) {
         String sql = "select f.*, r.name mpa_name from films f " +
@@ -212,21 +276,6 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getPopularFilmsOnGenreAndYear(Integer count, Integer genreId, Integer year) {
-        String sql = "select f.*, r.name mpa_name, count(fl.film_id) likes_count " +
-                "from films f " +
-                "left join film_likes fl on f.id = fl.film_id " +
-                "left join mpa r on f.mpa_id = r.id " +
-                "left join film_genres gen on f.ID  = gen.film_id " +
-                "where (? IS NULL OR extract(year from f.release_date) = ?) and (? IS NULL OR gen.genre_id = ?) " +
-                "group by f.id " +
-                "order by likes_count " +
-                "desc LIMIT ?";
-        List<Film> all = jdbcTemplate.query(sql, this::mapRowToFilm, year, year, genreId, genreId, count);
-        genreStorage.getGenresForFilms(all);
-        directorStorage.getDirectorForFilms(all);
-        return all;
-    }
 
     public Map<User, HashMap<Film, Double>> getRecommendationData(List<User> users, List<Film> films) {
 
