@@ -15,7 +15,9 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Component("userDbStorage")
@@ -134,5 +136,29 @@ public class UserDbStorage implements UserStorage {
                 resultSet.getString("login"),
                 resultSet.getString("name"),
                 resultSet.getDate("birthday").toLocalDate());
+    }
+
+    @Override
+    public List<String> getUserFeed(Integer id) {
+        String sql = "SELECT timestamp, userId, eventType, operation, entityId FROM feed WHERE userId = ?";
+        List<String> feed = new ArrayList<>();
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, id);
+        for (Map<String, Object> row : rows) {
+            String eventType = row.get("eventType").toString();
+            String operation = row.get("operation").toString();
+            String entityId = row.get("entityId").toString();
+            String timestamp = row.get("timestamp").toString();
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("Event Type: ").append(eventType);
+            stringBuilder.append(", Operation: ").append(operation);
+            stringBuilder.append(", Entity ID: ").append(entityId);
+            stringBuilder.append(", Timestamp: ").append(timestamp);
+            feed.add(stringBuilder.toString());
+        }
+        return feed;
+    }
+
+    private Integer getEventId(){
+        return EVENT_ID += 2;
     }
 }
