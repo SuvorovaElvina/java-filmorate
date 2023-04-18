@@ -63,6 +63,10 @@ public class UserController {
         return  userService.getRecommedations(userId);
     }
 
+    @GetMapping("/{id}/feed")
+    public List<String> getFeed(@PathVariable int id){
+        return userService.getUserFeed(id);
+    }
 
     @DeleteMapping("/{id}")
     public void removeUser(@PathVariable int id) {
