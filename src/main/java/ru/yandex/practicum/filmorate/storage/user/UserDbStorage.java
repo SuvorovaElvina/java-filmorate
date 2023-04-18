@@ -11,10 +11,8 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +23,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
+    private int EVENT_ID = 0;
 
     @Override
     public User add(User user) {
@@ -136,6 +135,29 @@ public class UserDbStorage implements UserStorage {
                 resultSet.getString("login"),
                 resultSet.getString("name"),
                 resultSet.getDate("birthday").toLocalDate());
+    }
+
+    @Override
+    public void createFeed(int userId, String eventType, String operation, int entityId) {
+        long timestamp = Timestamp.from(Instant.now()).getTime();
+        int eventId = getEventId();
+        String sql = "INSERT INTO feed (userId, timestamp, eventType, operation, entityId, eventId) VALUES (?, ?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, userId, timestamp, eventType, operation, entityId, eventId);
+    }
+
+    public void createFriendFeedback(int userId, int friendId, String feedbackType, int entityId) {
+        long timestamp = Timestamp.from(Instant.now()).getTime();
+        String sql = "INSERT INTO user_feedback (user_id, friend_id, feedback_type, entity_id, timestamp) VALUES (?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, userId, friendId, feedbackType, entityId, timestamp);
+    }
+
+    public List<Map<String, Object>> getFriendFeedback(int userId) {
+        String sql = "SELECT * FROM user_feedback WHERE user_id IN (SELECT friend_id FROM friends WHERE user_id = ?) AND feedback_type = 'review'";
+        return jdbcTemplate.queryForList(sql, userId);
+    }
+    public List<Map<String, Object>> getFriendLikes(int userId) {
+        String sql = "SELECT * FROM user_feedback WHERE user_id IN (SELECT friend_id FROM friends WHERE user_id = ?) AND feedback_type = 'like'";
+        return jdbcTemplate.queryForList(sql, userId);
     }
 
     @Override
