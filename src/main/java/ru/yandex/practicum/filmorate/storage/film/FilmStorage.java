@@ -43,4 +43,6 @@ public interface FilmStorage {
     List<Film> searchFilmByDirectorNameAndTitleFilm(String dirfilname);
 
     void createFeed(int userId, String eventType, String operation, int entityId);
+
+    Integer getEventId();
 }

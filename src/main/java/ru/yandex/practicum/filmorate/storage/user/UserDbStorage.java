@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
@@ -23,7 +24,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
-    private int EVENT_ID = 0;
+    private int eventId = 0;
 
     @Override
     public User add(User user) {
@@ -145,42 +146,28 @@ public class UserDbStorage implements UserStorage {
         jdbcTemplate.update(sql, userId, timestamp, eventType, operation, entityId, eventId);
     }
 
-    public void createFriendFeedback(int userId, int friendId, String feedbackType, int entityId) {
-        long timestamp = Timestamp.from(Instant.now()).getTime();
-        String sql = "INSERT INTO user_feedback (user_id, friend_id, feedback_type, entity_id, timestamp) VALUES (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, userId, friendId, feedbackType, entityId, timestamp);
-    }
-
-    public List<Map<String, Object>> getFriendFeedback(int userId) {
-        String sql = "SELECT * FROM user_feedback WHERE user_id IN (SELECT friend_id FROM friends WHERE user_id = ?) AND feedback_type = 'review'";
-        return jdbcTemplate.queryForList(sql, userId);
-    }
-    public List<Map<String, Object>> getFriendLikes(int userId) {
-        String sql = "SELECT * FROM user_feedback WHERE user_id IN (SELECT friend_id FROM friends WHERE user_id = ?) AND feedback_type = 'like'";
-        return jdbcTemplate.queryForList(sql, userId);
+    public List<Feed> getUserFeed(Integer id) {
+        if (getById(id).isEmpty()) {
+            throw new NotFoundException("Такого пользователя не существует");
+        }
+        String sql = "SELECT eventId, userId, entityId, eventType, operation, timestamp FROM feed WHERE userId = ?";
+        List<Map<String, Object>> feedList = jdbcTemplate.queryForList(sql, id);
+        List<Feed> feeds = new ArrayList<>();
+        for (Map<String, Object> feed : feedList) {
+            int eventId = (int) feed.get("eventId");
+            int userId = (int) feed.get("userId");
+            int entityId = (int) feed.get("entityId");
+            String eventType = (String) feed.get("eventType");
+            String operation = (String) feed.get("operation");
+            long timestamp = (long) feed.get("timestamp");
+            Feed f = new Feed(eventId, userId, timestamp, eventType, operation, entityId);
+            feeds.add(f);
+        }
+        return feeds;
     }
 
     @Override
-    public List<String> getUserFeed(Integer id) {
-        String sql = "SELECT timestamp, userId, eventType, operation, entityId FROM feed WHERE userId = ?";
-        List<String> feed = new ArrayList<>();
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, id);
-        for (Map<String, Object> row : rows) {
-            String eventType = row.get("eventType").toString();
-            String operation = row.get("operation").toString();
-            String entityId = row.get("entityId").toString();
-            String timestamp = row.get("timestamp").toString();
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("Event Type: ").append(eventType);
-            stringBuilder.append(", Operation: ").append(operation);
-            stringBuilder.append(", Entity ID: ").append(entityId);
-            stringBuilder.append(", Timestamp: ").append(timestamp);
-            feed.add(stringBuilder.toString());
-        }
-        return feed;
-    }
-
-    private Integer getEventId(){
-        return EVENT_ID += 2;
+    public Integer getEventId() {
+        return eventId += 1;
     }
 }
