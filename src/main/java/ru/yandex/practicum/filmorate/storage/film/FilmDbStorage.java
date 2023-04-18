@@ -13,10 +13,9 @@ import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
 import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
+import java.sql.*;
 import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,6 +26,7 @@ public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final GenreDbStorage genreStorage;
     private final DirectorDbStorage directorStorage;
+    private int EVENT_ID = 1;
 
     @Override
     public Film add(Film film) {
@@ -331,5 +331,17 @@ public class FilmDbStorage implements FilmStorage {
                     });
         }
 
+    }
+
+    @Override
+    public void createFeed(int userId, String eventType, String operation, int entityId) {
+        long timestamp = Timestamp.from(Instant.now()).getTime();
+        int eventId = getEventId();
+        String sql = "INSERT INTO feed (userId, timestamp, eventType, operation, entityId, eventId) VALUES (?, ?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, userId, timestamp, eventType, operation, entityId, eventId);
+    }
+
+    private Integer getEventId(){
+        return EVENT_ID += 2;
     }
 }
