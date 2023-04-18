@@ -13,7 +13,6 @@ import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
 import java.sql.*;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -161,26 +160,14 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public List<String> getUserFeed(Integer id) {
-        String sql = "SELECT timestamp, userId, eventType, operation, entityId FROM feed WHERE userId = ?";
-        List<String> feed = new ArrayList<>();
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, id);
-        for (Map<String, Object> row : rows) {
-            String eventType = row.get("eventType").toString();
-            String operation = row.get("operation").toString();
-            String entityId = row.get("entityId").toString();
-            String timestamp = row.get("timestamp").toString();
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("Event Type: ").append(eventType);
-            stringBuilder.append(", Operation: ").append(operation);
-            stringBuilder.append(", Entity ID: ").append(entityId);
-            stringBuilder.append(", Timestamp: ").append(timestamp);
-            feed.add(stringBuilder.toString());
-        }
+    public List<Map<String, Object>> getUserFeed(Integer id) {
+        String sql = "SELECT eventId, userId, entityId, eventType, operation, timestamp FROM feed WHERE userId = ?";
+        List<Map<String, Object>> feed = jdbcTemplate.queryForList(sql, id);
         return feed;
     }
 
-    private Integer getEventId(){
-        return EVENT_ID += 2;
+    @Override
+    public Integer getEventId(){
+        return EVENT_ID += 1;
     }
 }

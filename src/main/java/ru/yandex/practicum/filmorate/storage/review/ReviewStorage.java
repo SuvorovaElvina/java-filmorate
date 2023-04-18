@@ -23,4 +23,8 @@ public interface ReviewStorage {
     void revokeLikeReview(Integer reviewId, Integer userId);
 
     void revokeDislikeReview(Integer reviewId, Integer userId);
+
+    void createFeed(int userId, String eventType, String operation, int entityId);
+
+    Integer getEventId();
 }

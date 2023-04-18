@@ -19,16 +19,21 @@ public class ReviewService {
     private final UserStorage userStorage;
 
     public Review addReview(Review review) {
-        return reviewStorage.addReview(review);
+        reviewStorage.addReview(review);
+        reviewStorage.createFeed(review.getReviewId(), "REVIEW", "ADD", review.getReviewId());
+        return review;
     }
+
 
     public Review updateReview(Review review) {
         Optional<Review> reviewOptional = reviewStorage.updateReview(review);
+        reviewStorage.createFeed(review.getReviewId(), "REVIEW", "UPDATE", review.getReviewId());
         return reviewOptional.orElseThrow(() -> new NotFoundException("Такого отзыва нет в списке зарегистрированных."));
     }
 
     public void removeReview(Integer reviewId) {
         reviewStorage.removeReview(reviewId);
+        reviewStorage.createFeed(reviewId, "REVIEW", "REMOVE", reviewId);
     }
 
     public Review getReviewById(Integer reviewId) {
@@ -51,21 +56,25 @@ public class ReviewService {
     public void likeReview(Integer reviewId, Integer userId) {
         validateReviewAndUser(reviewId, userId);
         reviewStorage.likeReview(reviewId, userId);
+        //reviewStorage.createFeed(reviewId, "REVIEW", "ADD", reviewId);
     }
 
     public void dislikeReview(Integer reviewId, Integer userId) {
         validateReviewAndUser(reviewId, userId);
         reviewStorage.dislikeReview(reviewId, userId);
+        //reviewStorage.createFeed(reviewId, "REVIEW", "UPDATE", reviewId);
     }
 
     public void revokeLikeReview(Integer reviewId, Integer userId) {
         validateReviewAndUser(reviewId, userId);
         reviewStorage.revokeLikeReview(reviewId, userId);
+        //reviewStorage.createFeed(userId, "REVIEW", "UPDATE", userId);
     }
 
     public void revokeDislikeReview(Integer reviewId, Integer userId) {
         validateReviewAndUser(reviewId, userId);
         reviewStorage.revokeDislikeReview(reviewId, userId);
+        //reviewStorage.createFeed(userId, "REVIEW", "UPDATE", reviewId);
     }
 
     private void validateReviewAndUser(Integer reviewId, Integer userId) {

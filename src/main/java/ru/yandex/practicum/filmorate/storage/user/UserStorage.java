@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface UserStorage {
@@ -26,5 +27,7 @@ public interface UserStorage {
 
     void createFeed(int userId, String eventType, String operation, int entityId);
 
-    List<String> getUserFeed(Integer id);
+    List<Map<String, Object>> getUserFeed(Integer id);
+
+    Integer getEventId();
 }

@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -60,11 +61,11 @@ public class UserController {
 
     @GetMapping("/{userId}/recommendations")
     public List<Film> getRecommendations(@PathVariable("userId") int userId) {
-        return  userService.getRecommedations(userId);
+        return  userService.getRecommendations(userId);
     }
 
     @GetMapping("/{id}/feed")
-    public List<String> getFeed(@PathVariable int id){
+    public List<Map<String, Object>> getFeed(@PathVariable int id){
         return userService.getUserFeed(id);
     }
 

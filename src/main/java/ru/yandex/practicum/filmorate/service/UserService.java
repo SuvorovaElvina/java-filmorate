@@ -69,12 +69,14 @@ public class UserService {
         getUser(userId);
         getUser(friendId);
         userStorage.addFriend(userId, friendId);
+        userStorage.createFeed(userId, "FRIEND", "ADD", friendId);
     }
 
     public void removeFriend(Integer userId, Integer friendId) {
         getUser(userId);
         getUser(friendId);
         userStorage.removeFriend(userId, friendId);
+        userStorage.createFeed(userId, "FRIEND", "REMOVE", friendId);
     }
 
     public List<User> getFriends(Integer userId) {
@@ -95,7 +97,7 @@ public class UserService {
         return userStorage.getCommonFriends(userId, otherId);
     }
 
-    public List<Film> getRecommedations(int userId) {
+    public List<Film> getRecommendations(int userId) {
         User user = getUser(userId);
         List<Film> films = filmsStorage.getAll();
         List<Film> userFilms = filmsStorage.getLikes(userId, films);
@@ -112,7 +114,7 @@ public class UserService {
         return films;
     }
 
-    public List<String> getUserFeed(Integer id){
+    public List<Map<String, Object>> getUserFeed(Integer id){
         return userStorage.getUserFeed(id);
     }
 }

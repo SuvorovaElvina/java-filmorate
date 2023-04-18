@@ -17,6 +17,8 @@ import ru.yandex.practicum.filmorate.throwable.ValidationException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -167,5 +169,18 @@ public class ReviewDbStorage implements ReviewStorage {
             log.warn("Вызван некорректный отзыв или пользователь");
             throw new NotFoundException("Некорректный отзыв или пользователь");
         }
+    }
+
+    @Override
+    public void createFeed(int userId, String eventType, String operation, int entityId) {
+        long timestamp = Timestamp.from(Instant.now()).getTime();
+        int eventId = getEventId();
+        String sql = "INSERT INTO feed (userId, timestamp, eventType, operation, entityId, eventId) VALUES (?, ?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, userId, timestamp, eventType, operation, entityId, eventId);
+    }
+
+    @Override
+    public Integer getEventId(){
+        return userStorage.getEventId();
     }
 }
