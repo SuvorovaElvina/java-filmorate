@@ -26,6 +26,8 @@ public interface FilmStorage {
 
     List<Film> getPopularFilmsOnGenreAndYear(Integer count, Integer genreId, Integer year);
 
+    List<Film> getCommonFilms(Integer id, Integer otherId);
+
     List<Film> getLikes(int userId, List<Film> films);
 
     Map<User, HashMap<Film, Double>> getRecommendationData(List<User> users, List<Film> films);
