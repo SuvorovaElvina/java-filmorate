@@ -112,4 +112,7 @@ public class UserService {
         return films;
     }
 
+    public List<String> getUserFeed(Integer id){
+        return userStorage.getUserFeed(id);
+    }
 }
