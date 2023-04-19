@@ -71,6 +71,7 @@ public class FilmService {
         if (filmStorage.getById(filmId).isPresent()) {
             if (userStorage.getById(userId).isPresent()) {
                 filmStorage.addLike(filmId, userId);
+                filmStorage.createFeed(userId, "LIKE", "ADD", filmId);
             } else {
                 throw new NotFoundException("Пользователя с таким id - не существует.");
             }
@@ -89,6 +90,7 @@ public class FilmService {
             throw new NotFoundException("Пользователя с таким id - не существует.");
         }
         filmStorage.removeLike(filmId, userId);
+        filmStorage.createFeed(userId, "LIKE", "REMOVE", filmId);
     }
 
     public List<Film> getPopularFilmsOnGenreAndYear(Integer count, Integer genreId, Integer year) {
