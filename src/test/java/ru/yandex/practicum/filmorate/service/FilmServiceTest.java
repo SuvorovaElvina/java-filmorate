@@ -27,9 +27,7 @@ class FilmServiceTest {
     @Test
     void createFilm() {
         Film film = filmService.createFilm(new Film("name", "description",
-                LocalDate.of(2000,7,4), 100L, new Mpa(1, "G"), List.of()));
-
-
+                LocalDate.of(2000, 7, 4), 100L, new Mpa(1, "G"), List.of()));
         assertThat(film).hasFieldOrPropertyWithValue("id", film.getId())
                 .hasFieldOrPropertyWithValue("name", "name")
                 .hasFieldOrPropertyWithValue("description", "description")
@@ -40,10 +38,9 @@ class FilmServiceTest {
     @Test
     void updateFilm() {
         Film film1 = filmService.createFilm(new Film("name", "description",
-                LocalDate.of(2000,7,4), 100L, new Mpa(1, "G"), List.of()));
+                LocalDate.of(2000, 7, 4), 100L, new Mpa(1, "G"), List.of()));
         film1.setReleaseDate(LocalDate.of(2000, 12, 2));
         Film film = filmService.updateFilm(film1);
-        
         assertThat(film).hasFieldOrPropertyWithValue("id", film.getId())
                 .hasFieldOrPropertyWithValue("name", "name")
                 .hasFieldOrPropertyWithValue("description", "description")
@@ -57,21 +54,19 @@ class FilmServiceTest {
             filmService.updateFilm(new Film(9999, "name", "description",
                     LocalDate.of(2000, 12, 2), 120L, new Mpa(1, "G")));
         });
-
         Assertions.assertNotNull(thrown.getMessage());
     }
 
     @Test
     void getFilmById() {
         Film film1 = filmService.createFilm(new Film("name", "description",
-                LocalDate.of(2000,7,4), 100L, new Mpa(1, "G"), List.of()));
+                LocalDate.of(2000, 7, 4), 100L, new Mpa(1, "G"), List.of()));
         Film film = filmService.getFilm(film1.getId());
-
         assertThat(film).hasFieldOrPropertyWithValue("id", film.getId())
                 .hasFieldOrPropertyWithValue("name", "name")
                 .hasFieldOrPropertyWithValue("description", "description")
                 .hasFieldOrPropertyWithValue("duration", 100L)
-                .hasFieldOrPropertyWithValue("releaseDate", LocalDate.of(2000,7,4));
+                .hasFieldOrPropertyWithValue("releaseDate", LocalDate.of(2000, 7, 4));
     }
 
     @Test
@@ -79,7 +74,6 @@ class FilmServiceTest {
         Throwable thrown = assertThrows(IncorrectCountException.class, () -> {
             filmService.getFilm(-10);
         });
-
         Assertions.assertNotNull(thrown.getMessage());
     }
 
@@ -88,7 +82,6 @@ class FilmServiceTest {
         Throwable thrown = assertThrows(NotFoundException.class, () -> {
             filmService.getFilm(9999);
         });
-
         Assertions.assertNotNull(thrown.getMessage());
     }
 
@@ -97,7 +90,6 @@ class FilmServiceTest {
         Throwable thrown = assertThrows(NotFoundException.class, () -> {
             filmService.addLike(9999, 1);
         });
-
         Assertions.assertNotNull(thrown.getMessage());
     }
 
@@ -106,7 +98,6 @@ class FilmServiceTest {
         Throwable thrown = assertThrows(NotFoundException.class, () -> {
             filmService.addLike(1, 9999);
         });
-
         Assertions.assertNotNull(thrown.getMessage());
     }
 
@@ -124,14 +115,12 @@ class FilmServiceTest {
         Throwable thrown = assertThrows(NotFoundException.class, () -> {
             filmService.removeLike(1, 9999);
         });
-
         Assertions.assertNotNull(thrown.getMessage());
     }
 
     @Test
     void getPopularFilmsWithCount() {
         List<Film> films = filmService.getPopularFilmsOnGenreAndYear(10, 1, 1999);
-
         assertThat(films.size()).isEqualTo(0);
     }
 
@@ -140,7 +129,6 @@ class FilmServiceTest {
         Throwable thrown = assertThrows(NotFoundException.class, () -> {
             filmService.getFilmsByYear(9999);
         });
-
         Assertions.assertNotNull(thrown.getMessage());
     }
 
@@ -149,7 +137,6 @@ class FilmServiceTest {
         Throwable thrown = assertThrows(NotFoundException.class, () -> {
             filmService.getFilmsByLikes(9999);
         });
-
         Assertions.assertNotNull(thrown.getMessage());
     }
 
@@ -159,7 +146,6 @@ class FilmServiceTest {
             filmService.createFilm(new Film(1, "name", "description",
                     LocalDate.of(1800, 11, 2), 120L, new Mpa(1, "G")));
         });
-
         Assertions.assertNotNull(thrown.getMessage());
     }
 }
