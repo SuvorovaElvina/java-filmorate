@@ -76,7 +76,7 @@ class FilmServiceTest {
     @Test
     void getFilmByIdNegative() {
         Throwable thrown = assertThrows(IncorrectCountException.class, () -> {
-            filmService.getFilm(-1);
+            filmService.getFilm(-10);
         });
 
         Assertions.assertNotNull(thrown.getMessage());
