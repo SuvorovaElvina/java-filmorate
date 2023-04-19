@@ -110,20 +110,24 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void addLike(Integer filmId, Integer userId) {
-        final String sql = "insert into film_likes (film_id, user_id) values(?,?)";
-        this.jdbcTemplate.batchUpdate(sql,
-                new BatchPreparedStatementSetter() {
-                    public void setValues(PreparedStatement stmt, int i) throws SQLException {
-                        stmt.setInt(1, filmId);
-                        stmt.setInt(2, userId);
-                    }
+        String sql = "select count(*) from film_likes where film_id = ? and user_id = ?";
+        int result = jdbcTemplate.queryForObject(sql, Integer.class, filmId, userId);
+        if (result == 0) {
+            sql = "insert into film_likes (film_id, user_id) values(?,?)";
+            this.jdbcTemplate.batchUpdate(sql,
+                    new BatchPreparedStatementSetter() {
+                        public void setValues(PreparedStatement stmt, int i) throws SQLException {
+                            stmt.setInt(1, filmId);
+                            stmt.setInt(2, userId);
+                        }
 
-                    @Override
-                    public int getBatchSize() {
-                        return 1;
-                    }
-                });
-        log.info("Лайк от пользователя - {}.", userId);
+                        @Override
+                        public int getBatchSize() {
+                            return 1;
+                        }
+                    });
+            log.info("Лайк от пользователя - {}.", userId);
+        }
     }
 
     @Override

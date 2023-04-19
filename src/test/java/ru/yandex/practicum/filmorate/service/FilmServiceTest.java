@@ -29,6 +29,7 @@ class FilmServiceTest {
         Film film = filmService.createFilm(new Film("name", "description",
                 LocalDate.of(2000,7,4), 100L, new Mpa(1, "G"), List.of()));
 
+
         assertThat(film).hasFieldOrPropertyWithValue("id", film.getId())
                 .hasFieldOrPropertyWithValue("name", "name")
                 .hasFieldOrPropertyWithValue("description", "description")
@@ -42,7 +43,7 @@ class FilmServiceTest {
                 LocalDate.of(2000,7,4), 100L, new Mpa(1, "G"), List.of()));
         film1.setReleaseDate(LocalDate.of(2000, 12, 2));
         Film film = filmService.updateFilm(film1);
-
+        
         assertThat(film).hasFieldOrPropertyWithValue("id", film.getId())
                 .hasFieldOrPropertyWithValue("name", "name")
                 .hasFieldOrPropertyWithValue("description", "description")
