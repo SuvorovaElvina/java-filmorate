@@ -23,6 +23,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
+
     @Override
     public User add(User user) {
         final String sql = "insert into users(login, name, email, birthday) values (?, ?, ?, ?)";
