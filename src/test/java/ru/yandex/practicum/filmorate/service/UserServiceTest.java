@@ -13,8 +13,8 @@ import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThrows;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assert.*;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -118,15 +118,15 @@ class UserServiceTest {
 
     @Test
     void addFriend() {
-        userService.addFriend(1, 2);
+        userService.addFriend(1,2);
         assertThat(userService.getFriends(1).size()).isEqualTo(1);
-        userService.removeFriend(1, 2);
+        userService.removeFriend(1,2);
     }
 
     @Test
     void removeFriend() {
-        userService.addFriend(1, 5);
-        userService.removeFriend(1, 5);
+        userService.addFriend(1,5);
+        userService.removeFriend(1,5);
 
         assertThat(userService.getFriends(1).size()).isEqualTo(0);
     }
@@ -135,21 +135,21 @@ class UserServiceTest {
     void getFriends() {
         assertThat(userService.getFriends(1).size()).isEqualTo(0);
 
-        userService.addFriend(1, 2);
+        userService.addFriend(1,2);
 
         assertThat(userService.getFriends(1).size()).isEqualTo(1);
-        userService.removeFriend(1, 2);
+        userService.removeFriend(1,2);
     }
 
     @Test
     void getCommonFriends() {
         userService.createUser(new User("gmail@mail.ru", "log",
                 null, LocalDate.of(1999, 7, 21)));
-        userService.addFriend(1, 5);
-        userService.addFriend(2, 5);
+        userService.addFriend(1,5);
+        userService.addFriend(2,5);
 
-        assertThat(userService.getCommonFriends(1, 2).get(0).getId()).isEqualTo(5);
-        userService.removeFriend(1, 5);
-        userService.removeFriend(2, 5);
+        assertThat(userService.getCommonFriends(1,2).get(0).getId()).isEqualTo(5);
+        userService.removeFriend(1,5);
+        userService.removeFriend(2,5);
     }
 }

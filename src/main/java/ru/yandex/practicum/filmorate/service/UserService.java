@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -70,14 +69,12 @@ public class UserService {
         getUser(userId);
         getUser(friendId);
         userStorage.addFriend(userId, friendId);
-        userStorage.createFeed(userId, "FRIEND", "ADD", friendId);
     }
 
     public void removeFriend(Integer userId, Integer friendId) {
         getUser(userId);
         getUser(friendId);
         userStorage.removeFriend(userId, friendId);
-        userStorage.createFeed(userId, "FRIEND", "REMOVE", friendId);
     }
 
     public List<User> getFriends(Integer userId) {
@@ -98,7 +95,7 @@ public class UserService {
         return userStorage.getCommonFriends(userId, otherId);
     }
 
-    public List<Film> getRecommendations(int userId) {
+    public List<Film> getRecommedations(int userId) {
         User user = getUser(userId);
         List<Film> films = filmsStorage.getAll();
         List<Film> userFilms = filmsStorage.getLikes(userId, films);
@@ -108,14 +105,11 @@ public class UserService {
         HashMap<Film, Double> userRatings = inputData.get(user);
         films = new ArrayList<>();
         if (userRatings == null) return films;
-        for (Film film : userRatings.keySet()) {
+        for (Film film: userRatings.keySet()) {
             if ((userRatings.get(film) > 0) && (!userFilms.contains(film)))
                 films.add(film);
         }
         return films;
     }
 
-    public List<Feed> getUserFeed(Integer id) {
-        return userStorage.getUserFeed(id);
-    }
 }

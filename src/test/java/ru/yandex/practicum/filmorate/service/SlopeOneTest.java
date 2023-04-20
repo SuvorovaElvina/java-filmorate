@@ -92,7 +92,7 @@ class SlopeOneTest {
         films.add(film2);
         films.add(film3);
         inputData = (SlopeOne.slopeOne(inputData, films));
-        assertEquals(inputData.get(user3).get(film1), 4.375);
+        assertEquals(inputData.get(user3).get(film1),4.375);
     }
 
 

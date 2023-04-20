@@ -19,19 +19,15 @@ public class ReviewService {
     private final UserStorage userStorage;
 
     public Review addReview(Review review) {
-        reviewStorage.addReview(review);
-        reviewStorage.createFeed(review.getUserId(), "REVIEW", "ADD", review.getReviewId());
-        return review;
+        return reviewStorage.addReview(review);
     }
 
     public Review updateReview(Review review) {
         Optional<Review> reviewOptional = reviewStorage.updateReview(review);
-        reviewStorage.createFeed(reviewOptional.get().getUserId(), "REVIEW", "UPDATE", reviewOptional.get().getReviewId());
         return reviewOptional.orElseThrow(() -> new NotFoundException("Такого отзыва нет в списке зарегистрированных."));
     }
 
     public void removeReview(Integer reviewId) {
-        reviewStorage.createFeed(getReviewById(reviewId).getUserId(), "REVIEW", "REMOVE", reviewId);
         reviewStorage.removeReview(reviewId);
     }
 

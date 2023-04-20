@@ -8,15 +8,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
-import java.sql.*;
-import java.time.Instant;
-import java.util.ArrayList;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Component("userDbStorage")
@@ -24,7 +23,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
-    private int eventId = 0;
 
     @Override
     public User add(User user) {
@@ -136,38 +134,5 @@ public class UserDbStorage implements UserStorage {
                 resultSet.getString("login"),
                 resultSet.getString("name"),
                 resultSet.getDate("birthday").toLocalDate());
-    }
-
-    @Override
-    public void createFeed(int userId, String eventType, String operation, int entityId) {
-        long timestamp = Timestamp.from(Instant.now()).getTime();
-        int eventId = getEventId();
-        String sql = "INSERT INTO feed (userId, timestamp, eventType, operation, entityId, eventId) VALUES (?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, userId, timestamp, eventType, operation, entityId, eventId);
-    }
-
-    public List<Feed> getUserFeed(Integer id) {
-        if (getById(id).isEmpty()) {
-            throw new NotFoundException("Такого пользователя не существует");
-        }
-        String sql = "SELECT eventId, userId, entityId, eventType, operation, timestamp FROM feed WHERE userId = ?";
-        List<Map<String, Object>> feedList = jdbcTemplate.queryForList(sql, id);
-        List<Feed> feeds = new ArrayList<>();
-        for (Map<String, Object> feed : feedList) {
-            int eventId = (int) feed.get("eventId");
-            int userId = (int) feed.get("userId");
-            int entityId = (int) feed.get("entityId");
-            String eventType = (String) feed.get("eventType");
-            String operation = (String) feed.get("operation");
-            long timestamp = (long) feed.get("timestamp");
-            Feed f = new Feed(eventId, userId, timestamp, eventType, operation, entityId);
-            feeds.add(f);
-        }
-        return feeds;
-    }
-
-    @Override
-    public Integer getEventId() {
-        return eventId += 1;
     }
 }

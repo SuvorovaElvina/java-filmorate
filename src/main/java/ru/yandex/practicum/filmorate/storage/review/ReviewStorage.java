@@ -12,8 +12,6 @@ public interface ReviewStorage {
 
     void removeReview(Integer reviewId);
 
-    void removeUsersReview(int id);
-
     Optional<Review> getReviewById(Integer reviewId);
 
     List<Review> getReviewsForFilm(Integer filmId, Integer count);
@@ -25,8 +23,4 @@ public interface ReviewStorage {
     void revokeLikeReview(Integer reviewId, Integer userId);
 
     void revokeDislikeReview(Integer reviewId, Integer userId);
-
-    void createFeed(int userId, String eventType, String operation, int entityId);
-
-    Integer getEventId();
 }
