@@ -77,6 +77,7 @@ public class FilmService {
         } else {
             throw new NotFoundException("Фильма с таким id - не существует");
         }
+        filmStorage.createFeed(userId, "LIKE", "ADD", filmId);
     }
 
     public void removeLike(Integer filmId, Integer userId) {
@@ -89,6 +90,7 @@ public class FilmService {
             throw new NotFoundException("Пользователя с таким id - не существует.");
         }
         filmStorage.removeLike(filmId, userId);
+        filmStorage.createFeed(userId, "LIKE", "REMOVE", filmId);
     }
 
     public List<Film> getPopularFilmsOnGenreAndYear(Integer count, Integer genreId, Integer year) {

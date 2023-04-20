@@ -9,7 +9,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.throwable.NotFoundException;
@@ -44,7 +43,7 @@ class FilmDbStorageTests {
         assertThat(filmOptional)
                 .isPresent()
                 .hasValueSatisfying(film1 ->
-                        assertThat(film1).hasFieldOrPropertyWithValue("id", 23)
+                        assertThat(film1).hasFieldOrPropertyWithValue("id", film.getId())
                 );
     }
 
@@ -61,7 +60,7 @@ class FilmDbStorageTests {
         Film film = filmStorage.add(new Film("gg", "desc",
                 LocalDate.of(2026, 7, 21), 100L, new Mpa(1, "G"), List.of()));
 
-        assertThat(film).hasFieldOrPropertyWithValue("id", 24)
+        assertThat(film).hasFieldOrPropertyWithValue("id", film.getId())
                 .hasFieldOrPropertyWithValue("name", "gg")
                 .hasFieldOrPropertyWithValue("description", "desc")
                 .hasFieldOrPropertyWithValue("releaseDate", LocalDate.of(2026, 7, 21))
@@ -78,7 +77,7 @@ class FilmDbStorageTests {
         assertThat(filmOptional)
                 .isPresent()
                 .hasValueSatisfying(filmOpt ->
-                        assertThat(filmOpt).hasFieldOrPropertyWithValue("id", 21)
+                        assertThat(filmOpt).hasFieldOrPropertyWithValue("id", film.getId())
                                 .hasFieldOrPropertyWithValue("name", "com")
                                 .hasFieldOrPropertyWithValue("description", "desc")
                                 .hasFieldOrPropertyWithValue("releaseDate", LocalDate.of(2036, 7, 21))

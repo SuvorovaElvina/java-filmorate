@@ -12,8 +12,8 @@ import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
 
 @SpringBootTest
 @AutoConfigureTestDatabase

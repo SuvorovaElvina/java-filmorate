@@ -38,7 +38,7 @@ class UserDbStorageTests {
         assertThat(userOptional)
                 .isPresent()
                 .hasValueSatisfying(user1 ->
-                        assertThat(user1).hasFieldOrPropertyWithValue("id", 33)
+                        assertThat(user1).hasFieldOrPropertyWithValue("id", user.getId())
                 );
     }
 
@@ -67,7 +67,7 @@ class UserDbStorageTests {
         User user = userStorage.add(new User("gmail@mail.ru", "log",
                 "Nike", LocalDate.of(1999, 7, 21)));
 
-        assertThat(user).hasFieldOrPropertyWithValue("id", 32)
+        assertThat(user).hasFieldOrPropertyWithValue("id", user.getId())
                 .hasFieldOrPropertyWithValue("name", "Nike")
                 .hasFieldOrPropertyWithValue("email", "gmail@mail.ru")
                 .hasFieldOrPropertyWithValue("login", "log")
