@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
+import ru.yandex.practicum.filmorate.storage.feed.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.throwable.IncorrectCountException;
@@ -26,6 +27,8 @@ public class FilmService {
     @Qualifier("userDbStorage")
     private final UserStorage userStorage;
     private final DirectorStorage directorStorage;
+    @Qualifier("feedDbStorage")
+    private final FeedStorage feedStorage;
 
     public Film createFilm(Film film) {
         validateFilm(film);
@@ -77,7 +80,7 @@ public class FilmService {
         } else {
             throw new NotFoundException("Фильма с таким id - не существует");
         }
-        filmStorage.createFeed(userId, "LIKE", "ADD", filmId);
+        feedStorage.createFeed(userId, "LIKE", "ADD", filmId);
     }
 
     public void removeLike(Integer filmId, Integer userId) {
@@ -90,7 +93,7 @@ public class FilmService {
             throw new NotFoundException("Пользователя с таким id - не существует.");
         }
         filmStorage.removeLike(filmId, userId);
-        filmStorage.createFeed(userId, "LIKE", "REMOVE", filmId);
+        feedStorage.createFeed(userId, "LIKE", "REMOVE", filmId);
     }
 
     public List<Film> getPopularFilmsOnGenreAndYear(Integer count, Integer genreId, Integer year) {
