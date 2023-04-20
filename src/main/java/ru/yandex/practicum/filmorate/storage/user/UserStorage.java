@@ -25,9 +25,5 @@ public interface UserStorage {
 
     void removeFriend(Integer userId, Integer friendId);
 
-    void createFeed(int userId, String eventType, String operation, int entityId);
-
     List<Feed> getUserFeed(Integer id);
-
-    Integer getEventId();
 }

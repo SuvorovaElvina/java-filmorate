@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.feed.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.throwable.IncorrectCountException;
@@ -21,6 +22,9 @@ public class UserService {
 
     @Qualifier("filmDbStorage")
     private final FilmStorage filmsStorage;
+
+    @Qualifier("feedDbStorage")
+    private final FeedStorage feedStorage;
 
     public User createUser(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
@@ -70,14 +74,14 @@ public class UserService {
         getUser(userId);
         getUser(friendId);
         userStorage.addFriend(userId, friendId);
-        userStorage.createFeed(userId, "FRIEND", "ADD", friendId);
+        feedStorage.createFeed(userId, "FRIEND", "ADD", friendId);
     }
 
     public void removeFriend(Integer userId, Integer friendId) {
         getUser(userId);
         getUser(friendId);
         userStorage.removeFriend(userId, friendId);
-        userStorage.createFeed(userId, "FRIEND", "REMOVE", friendId);
+        feedStorage.createFeed(userId, "FRIEND", "REMOVE", friendId);
     }
 
     public List<User> getFriends(Integer userId) {

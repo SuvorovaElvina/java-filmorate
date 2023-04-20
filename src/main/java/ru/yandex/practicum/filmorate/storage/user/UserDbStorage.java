@@ -13,7 +13,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
 import java.sql.*;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,8 +23,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
-    private int eventId = 0;
-
     @Override
     public User add(User user) {
         final String sql = "insert into users(login, name, email, birthday) values (?, ?, ?, ?)";
@@ -138,14 +135,6 @@ public class UserDbStorage implements UserStorage {
                 resultSet.getDate("birthday").toLocalDate());
     }
 
-    @Override
-    public void createFeed(int userId, String eventType, String operation, int entityId) {
-        long timestamp = Timestamp.from(Instant.now()).getTime();
-        int eventId = getEventId();
-        String sql = "INSERT INTO feed (userId, timestamp, eventType, operation, entityId, eventId) VALUES (?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, userId, timestamp, eventType, operation, entityId, eventId);
-    }
-
     public List<Feed> getUserFeed(Integer id) {
         if (getById(id).isEmpty()) {
             throw new NotFoundException("Такого пользователя не существует");
@@ -164,10 +153,5 @@ public class UserDbStorage implements UserStorage {
             feeds.add(f);
         }
         return feeds;
-    }
-
-    @Override
-    public Integer getEventId() {
-        return eventId += 1;
     }
 }
