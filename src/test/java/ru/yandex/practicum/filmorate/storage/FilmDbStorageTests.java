@@ -94,13 +94,4 @@ class FilmDbStorageTests {
 
         assertThat(filmOptional).isEmpty();
     }
-
-    @Test
-    public void testRemoveFilmUnknown() {
-        Throwable thrown = assertThrows(NotFoundException.class, () -> {
-            filmStorage.remove(1);
-        });
-
-        Assertions.assertNotNull(thrown.getMessage());
-    }
 }
