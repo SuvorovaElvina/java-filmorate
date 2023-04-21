@@ -29,7 +29,7 @@ public class ReviewService {
     public Review updateReview(Review review) {
         Optional<Review> reviewOptional = reviewStorage.updateReview(review);
         feedStorage.createFeed(reviewOptional.get().getUserId(), "REVIEW", "UPDATE", reviewOptional.get().getReviewId());
-        return reviewOptional.orElseThrow(() -> new NotFoundException("Такого отзыва нет в списке зарегистрированных."));
+        return reviewOptional.orElseThrow(() -> new NotFoundException(String.format("Отзыва с id %d - нет в списке зарегистрированных.", review.getReviewId())));
     }
 
     public void removeReview(Integer reviewId) {
@@ -45,7 +45,7 @@ public class ReviewService {
             if (reviewId < 0) {
                 throw new IncorrectCountException("id не должно быть меньше 0");
             } else {
-                throw new NotFoundException("Отзыв с указанным id - не существует");
+                throw new NotFoundException(String.format("Отзыв с id %d - не существует", reviewId));
             }
         }
     }
@@ -77,11 +77,14 @@ public class ReviewService {
     private void validateReviewAndUser(Integer reviewId, Integer userId) {
         Optional<Review> reviewOpt = reviewStorage.getReviewById(reviewId);
         Optional<User> userOpt = userStorage.getById(userId);
-        if (reviewOpt.isEmpty()) {
-            throw new NotFoundException("Отзыва с таким id - не существует");
-        }
-        if (userOpt.isEmpty()) {
-            throw new NotFoundException("Пользователя с таким id - не существует.");
+        if (reviewId < 0) {
+            throw new IncorrectCountException("id ревью не должно быть меньше 0.");
+        } else if (userId < 0) {
+            throw new IncorrectCountException("id пользователя не должно быть меньше 0.");
+        } else if (reviewOpt.isEmpty()) {
+            throw new NotFoundException(String.format("Отзыва с id %d - не существует", reviewId));
+        } else if (userOpt.isEmpty()) {
+            throw new NotFoundException(String.format("Пользователя с таким id %d - не существует.", userId));
         }
     }
 }

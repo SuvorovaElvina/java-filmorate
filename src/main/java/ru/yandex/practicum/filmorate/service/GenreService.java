@@ -27,7 +27,7 @@ public class GenreService {
             if (id < 0) {
                 throw new IncorrectCountException("id не должно быть меньше 0.");
             } else {
-                throw new NotFoundException("Фильм с указанный id - не существует.");
+                throw new NotFoundException(String.format("Жанр с id %d - не существует.", id));
             }
         }
     }

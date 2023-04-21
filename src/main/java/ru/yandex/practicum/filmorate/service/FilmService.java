@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.feed.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -38,7 +37,7 @@ public class FilmService {
     public Film updateFilm(Film film) {
         validateFilm(film);
         Optional<Film> filmOptional = filmStorage.update(film);
-        return filmOptional.orElseThrow(() -> new NotFoundException("Такого фильма нет в списке зарегистрированных."));
+        return filmOptional.orElseThrow(() -> new NotFoundException(String.format("Фильма с id %d - нет в списке зарегистрированных.", film.getId())));
     }
 
     public List<Film> getFilms() {
@@ -53,45 +52,26 @@ public class FilmService {
             if (id < 0) {
                 throw new IncorrectCountException("id не должно быть меньше 0.");
             } else {
-                throw new NotFoundException("Фильм с указанный id - не существует.");
+                throw new NotFoundException(String.format("Фильм с id %d - не существует.", id));
             }
         }
     }
 
     public void removeFilm(int id) {
-        Optional<Film> filmOpt = filmStorage.getById(id);
-        if (filmOpt.isEmpty()) {
-            if (id < 0) {
-                throw new IncorrectCountException("id не должно быть меньше 0.");
-            } else {
-                throw new NotFoundException("Фильм с указанный id - не существует.");
-            }
-        }
+        validateIdFilm(id);
         filmStorage.remove(id);
     }
 
     public void addLike(Integer filmId, Integer userId) {
-        if (filmStorage.getById(filmId).isPresent()) {
-            if (userStorage.getById(userId).isPresent()) {
-                filmStorage.addLike(filmId, userId);
-            } else {
-                throw new NotFoundException("Пользователя с таким id - не существует.");
-            }
-        } else {
-            throw new NotFoundException("Фильма с таким id - не существует");
-        }
+        validateIdFilm(filmId);
+        validateIdUser(userId);
+        filmStorage.addLike(filmId, userId);
         feedStorage.createFeed(userId, "LIKE", "ADD", filmId);
     }
 
     public void removeLike(Integer filmId, Integer userId) {
-        Optional<Film> filmOpt = filmStorage.getById(filmId);
-        Optional<User> userOpt = userStorage.getById(userId);
-        if (filmOpt.isEmpty()) {
-            throw new NotFoundException("Фильма с таким id - не существует");
-        }
-        if (userOpt.isEmpty()) {
-            throw new NotFoundException("Пользователя с таким id - не существует.");
-        }
+        validateIdFilm(filmId);
+        validateIdUser(userId);
         filmStorage.removeLike(filmId, userId);
         feedStorage.createFeed(userId, "LIKE", "REMOVE", filmId);
     }
@@ -105,16 +85,12 @@ public class FilmService {
     }
 
     public List<Film> getFilmsByYear(int id) {
-        if (directorStorage.getById(id).isEmpty()) {
-            throw new NotFoundException("Режиссёра с таким id - не существует");
-        }
+        validateIdDirector(id);
         return filmStorage.getFilmsByYear(id);
     }
 
     public List<Film> getFilmsByLikes(int id) {
-        if (directorStorage.getById(id).isEmpty()) {
-            throw new NotFoundException("Режиссёра с таким id - не существует");
-        }
+        validateIdDirector(id);
         return filmStorage.getFilmsByLikes(id);
     }
 
@@ -141,6 +117,30 @@ public class FilmService {
         if (film.getReleaseDate().isBefore(AFTER_RELEASE_DATE)) {
             throw new ValidationException("Фильм должен быть не раньше " + AFTER_RELEASE_DATE.getDayOfMonth()
                     + " " + AFTER_RELEASE_DATE.getMonth() + " " + AFTER_RELEASE_DATE.getYear());
+        }
+    }
+
+    private void validateIdFilm(Integer id) {
+        if (id < 0) {
+            throw new IncorrectCountException("id не должно быть меньше 0.");
+        } else if (filmStorage.getById(id).isEmpty()) {
+            throw new NotFoundException(String.format("Фильм с id %d - не существует.", id));
+        }
+    }
+
+    private void validateIdUser(Integer id) {
+        if (id < 0) {
+            throw new IncorrectCountException("id не должно быть меньше 0.");
+        } else if (userStorage.getById(id).isEmpty()) {
+            throw new NotFoundException(String.format("Пользователь с id %d - не существует.", id));
+        }
+    }
+
+    private void validateIdDirector(Integer id) {
+        if (id < 0) {
+            throw new IncorrectCountException("id не должно быть меньше 0.");
+        } else if (directorStorage.getById(id).isEmpty()) {
+            throw new NotFoundException(String.format("Режиссёр с id %d - не существует.", id));
         }
     }
 }

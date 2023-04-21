@@ -27,7 +27,7 @@ public class MpaService {
             if (id < 0) {
                 throw new IncorrectCountException("id не должно быть меньше 0.");
             } else {
-                throw new NotFoundException("Фильм с указанный id - не существует.");
+                throw new NotFoundException(String.format("Рейтинга с id %d - не существует.", id));
             }
         }
     }

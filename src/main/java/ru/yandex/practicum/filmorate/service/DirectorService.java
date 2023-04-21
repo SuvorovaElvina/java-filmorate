@@ -21,7 +21,7 @@ public class DirectorService {
 
     public Director updateDirector(Director director) {
         Optional<Director> directorOpt = directorStorage.update(director);
-        return directorOpt.orElseThrow(() -> new NotFoundException("Такого режиссёра нет в списке зарегистрированных."));
+        return directorOpt.orElseThrow(() -> new NotFoundException(String.format("Режиссёра c id %d - нет в списке зарегистрированных.", director.getId())));
     }
 
     public List<Director> getDirectors() {
@@ -36,12 +36,17 @@ public class DirectorService {
             if (id < 0) {
                 throw new IncorrectCountException("id не должно быть меньше 0.");
             } else {
-                throw new NotFoundException("Режиссёр с указанный id - не существует.");
+                throw new NotFoundException(String.format("Режиссёр с id %d - не существует.", id));
             }
         }
     }
 
     public void deleteDirector(int id) {
+        if (id < 0) {
+            throw new IncorrectCountException("id не должно быть меньше 0.");
+        } else if (directorStorage.getById(id).isEmpty()) {
+            throw new NotFoundException(String.format("Режиссёр с id %d - не существует.", id));
+        }
         directorStorage.remove(id);
     }
 }

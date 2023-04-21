@@ -38,7 +38,7 @@ public class UserService {
             user.setName(user.getLogin());
         }
         Optional<User> userOptional = userStorage.update(user);
-        return userOptional.orElseThrow(() -> new NotFoundException("Такого пользователя нет в списке зарегистрированых."));
+        return userOptional.orElseThrow(() -> new NotFoundException(String.format("Пользователя с id - %d нет в списке зарегистрированых.", user.getId())));
     }
 
     public List<User> getUsers() {
@@ -53,52 +53,38 @@ public class UserService {
             if (id < 0) {
                 throw new IncorrectCountException("id не должно быть меньше 0.");
             } else {
-                throw new NotFoundException("Пользователя с указанным id - не существует.");
+                throw new NotFoundException(String.format("Пользователя с id %d - не существует.", id));
             }
         }
     }
 
     public void removeUser(int id) {
-        Optional<User> userOpt = userStorage.getById(id);
-        if (userOpt.isEmpty()) {
-            if (id < 0) {
-                throw new IncorrectCountException("id не должно быть меньше 0.");
-            } else {
-                throw new NotFoundException("Пользователя с указанным id - не существует.");
-            }
-        }
+        validate(id);
         userStorage.remove(id);
     }
 
     public void addFriend(Integer userId, Integer friendId) {
-        getUser(userId);
-        getUser(friendId);
+        validate(userId);
+        validate(friendId);
         userStorage.addFriend(userId, friendId);
         feedStorage.createFeed(userId, "FRIEND", "ADD", friendId);
     }
 
     public void removeFriend(Integer userId, Integer friendId) {
-        getUser(userId);
-        getUser(friendId);
+        validate(userId);
+        validate(friendId);
         userStorage.removeFriend(userId, friendId);
         feedStorage.createFeed(userId, "FRIEND", "REMOVE", friendId);
     }
 
     public List<User> getFriends(Integer userId) {
-        Optional<User> userOpt = userStorage.getById(userId);
-        if (userOpt.isEmpty()) {
-            if (userId < 0) {
-                throw new IncorrectCountException("id не должно быть меньше 0.");
-            } else {
-                throw new NotFoundException("Фильм с указанный id - не существует.");
-            }
-        }
+        validate(userId);
         return userStorage.getFriends(userId);
     }
 
     public List<User> getCommonFriends(Integer userId, Integer otherId) {
-        getUser(userId);
-        getUser(otherId);
+        validate(userId);
+        validate(otherId);
         return userStorage.getCommonFriends(userId, otherId);
     }
 
@@ -121,5 +107,13 @@ public class UserService {
 
     public List<Feed> getUserFeed(Integer id) {
         return userStorage.getUserFeed(id);
+    }
+
+    private void validate(Integer id) {
+        if (id < 0) {
+            throw new IncorrectCountException("id не должно быть меньше 0.");
+        } else if (userStorage.getById(id).isEmpty()) {
+            throw new NotFoundException(String.format("Пользователь с id %d - не существует.", id));
+        }
     }
 }
