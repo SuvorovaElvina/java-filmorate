@@ -10,9 +10,11 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
-import java.sql.*;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -134,9 +136,6 @@ public class UserDbStorage implements UserStorage {
     }
 
     public List<Feed> getUserFeed(Integer id) {
-        if (getById(id).isEmpty()) {
-            throw new NotFoundException("Такого пользователя не существует");
-        }
         String sql = "SELECT eventId, userId, entityId, eventType, operation, timestamp FROM feed WHERE userId = ?";
         List<Map<String, Object>> feedList = jdbcTemplate.queryForList(sql, id);
         List<Feed> feeds = new ArrayList<>();

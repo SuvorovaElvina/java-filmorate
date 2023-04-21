@@ -106,6 +106,7 @@ public class UserService {
     }
 
     public List<Feed> getUserFeed(Integer id) {
+        validate(id);
         return userStorage.getUserFeed(id);
     }
 
