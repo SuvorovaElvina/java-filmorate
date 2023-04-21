@@ -1,8 +1,10 @@
 package ru.yandex.practicum.filmorate.model;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -10,17 +12,18 @@ import javax.validation.constraints.NotNull;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Review {
-    private Integer reviewId;
+    Integer reviewId;
     @NotBlank(message = "Отзыв не может быть пустым.")
-    private String content;
+    String content;
     @NotNull(message = "Отзыв должен содержать характеристику фильма")
-    private Boolean isPositive;
+    Boolean isPositive;
     @NotNull(message = "Отзыв должен содержать ID пользователя.")
-    private Integer userId;
+    Integer userId;
     @NotNull(message = "Отзыв должен содержать ID фильма.")
-    private Integer filmId;
-    private Integer useful;
+    Integer filmId;
+    Integer useful;
 
     public Review(String content, Boolean isPositive, Integer userId, Integer filmId) {
         this.content = content;

@@ -1,9 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -17,21 +15,22 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Film {
-    private Integer id;
+    Integer id;
     @NotBlank(message = "Имя не должно быть пустым.")
-    private String name;
+    String name;
     @NotNull(message = "Описание должно быть заполнено.")
     @Size(max = 200, message = "Нельзя описание превышать за 200 символов")
-    private String description;
+    String description;
     @NotNull(message = "Дата релиза должна быть заполнена.")
-    private LocalDate releaseDate;
+    LocalDate releaseDate;
     @Positive(message = "Продолжительность фильма должна быть положительной.")
-    private Long duration;
+    Long duration;
     @NotNull(message = "Рейтинг фильма не может быть пустым.")
-    private Mpa mpa;
-    private List<Genre> genres = new ArrayList<>();
-    private List<Director> directors = new ArrayList<>();
+    Mpa mpa;
+    List<Genre> genres = new ArrayList<>();
+    List<Director> directors = new ArrayList<>();
 
     public Film(String name, String description, LocalDate releaseDate, Long duration, Mpa mpa, List<Genre> genres) {
         this.name = name;
