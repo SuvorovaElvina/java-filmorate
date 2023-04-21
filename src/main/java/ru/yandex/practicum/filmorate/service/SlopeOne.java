@@ -10,9 +10,9 @@ import java.util.Map.Entry;
 
 public class SlopeOne {
 
-    private static Map<Film, Map<Film, Double>> diff = new HashMap<>();
-    private static Map<Film, Map<Film, Integer>> freq = new HashMap<>();
-    private static Map<User, HashMap<Film, Double>> outputData = new HashMap<>();
+    private static final Map<Film, Map<Film, Double>> diff = new HashMap<>();
+    private static final Map<Film, Map<Film, Integer>> freq = new HashMap<>();
+    private static final Map<User, HashMap<Film, Double>> outputData = new HashMap<>();
 
     public static Map<User, HashMap<Film, Double>> slopeOne(Map<User, HashMap<Film, Double>> inputData, List<Film> films) {
         buildDifferencesMatrix(inputData);
