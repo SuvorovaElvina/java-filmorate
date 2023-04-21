@@ -8,14 +8,16 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.throwable.NotFoundException;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Component("userDbStorage")
@@ -44,10 +46,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public void remove(Integer id) {
         String sql = "delete from users where id = ?";
-        int updateCount = jdbcTemplate.update(sql, id);
-        if (updateCount <= 0) {
-            throw new NotFoundException("Фильма не существует. Удаление не возможно.");
-        }
+        jdbcTemplate.update(sql, id);
         log.info("Пользователь удалён");
     }
 
@@ -134,5 +133,22 @@ public class UserDbStorage implements UserStorage {
                 resultSet.getString("login"),
                 resultSet.getString("name"),
                 resultSet.getDate("birthday").toLocalDate());
+    }
+
+    public List<Feed> getUserFeed(Integer id) {
+        String sql = "SELECT eventId, userId, entityId, eventType, operation, timestamp FROM feed WHERE userId = ?";
+        List<Map<String, Object>> feedList = jdbcTemplate.queryForList(sql, id);
+        List<Feed> feeds = new ArrayList<>();
+        for (Map<String, Object> feed : feedList) {
+            int eventId = (int) feed.get("eventId");
+            int userId = (int) feed.get("userId");
+            int entityId = (int) feed.get("entityId");
+            String eventType = (String) feed.get("eventType");
+            String operation = (String) feed.get("operation");
+            long timestamp = (long) feed.get("timestamp");
+            Feed f = new Feed(eventId, userId, timestamp, eventType, operation, entityId);
+            feeds.add(f);
+        }
+        return feeds;
     }
 }

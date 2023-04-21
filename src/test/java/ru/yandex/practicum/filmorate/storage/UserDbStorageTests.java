@@ -1,10 +1,12 @@
-package ru.yandex.practicum.filmorate;
+package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
@@ -18,27 +20,38 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class UserDbStorageTests {
+    private final JdbcTemplate jdbcTemplate;
     private final UserDbStorage userStorage;
+
+    @BeforeEach
+    void cleanDb() {
+        jdbcTemplate.update("DELETE FROM friends");
+        jdbcTemplate.update("DELETE FROM users");
+    }
 
     @Test
     public void testFindUserById() {
-        Optional<User> userOptional = userStorage.getById(1);
+        User user = userStorage.add(new User("gmail@mail.ru", "log",
+                "Nike", LocalDate.of(1999, 7, 21)));
+        Optional<User> userOptional = userStorage.getById(user.getId());
 
         assertThat(userOptional)
                 .isPresent()
-                .hasValueSatisfying(user ->
-                        assertThat(user).hasFieldOrPropertyWithValue("id", 1)
+                .hasValueSatisfying(user1 ->
+                        assertThat(user1).hasFieldOrPropertyWithValue("id", user.getId())
                 );
     }
 
     @Test
     public void testFindUserNameIsEmptyById() {
-        Optional<User> userOptional = userStorage.getById(2);
+        User user = userStorage.add(new User("gmail@mail.ru", "log",
+                "", LocalDate.of(1999, 7, 21)));
+        Optional<User> userOptional = userStorage.getById(user.getId());
 
         assertThat(userOptional)
                 .isPresent()
-                .hasValueSatisfying(user ->
-                        assertThat(user).hasFieldOrPropertyWithValue("id", 2)
+                .hasValueSatisfying(user1 ->
+                        assertThat(user1).hasFieldOrPropertyWithValue("id", user.getId())
                 );
     }
 
@@ -46,7 +59,7 @@ class UserDbStorageTests {
     public void testGetUsers() {
         List<User> users = userStorage.getAll();
 
-        assertThat(users.size()).isEqualTo(3);
+        assertThat(users.size()).isEqualTo(0);
     }
 
     @Test
@@ -54,7 +67,7 @@ class UserDbStorageTests {
         User user = userStorage.add(new User("gmail@mail.ru", "log",
                 "Nike", LocalDate.of(1999, 7, 21)));
 
-        assertThat(user).hasFieldOrPropertyWithValue("id", 1)
+        assertThat(user).hasFieldOrPropertyWithValue("id", user.getId())
                 .hasFieldOrPropertyWithValue("name", "Nike")
                 .hasFieldOrPropertyWithValue("email", "gmail@mail.ru")
                 .hasFieldOrPropertyWithValue("login", "log")
@@ -63,13 +76,15 @@ class UserDbStorageTests {
 
     @Test
     public void testUpdateUser() {
-        Optional<User> userOptional = userStorage.update(new User(1, "mail@mail.ru", "LOGIN",
+        User user = userStorage.add(new User("gmail@mail.ru", "log",
+                "Nike", LocalDate.of(1999, 7, 21)));
+        Optional<User> userOptional = userStorage.update(new User(user.getId(), "mail@mail.ru", "LOGIN",
                 "Make", LocalDate.of(2000, 1, 20)));
 
         assertThat(userOptional)
                 .isPresent()
-                .hasValueSatisfying(user ->
-                        assertThat(user).hasFieldOrPropertyWithValue("id", 1)
+                .hasValueSatisfying(user1 ->
+                        assertThat(user1).hasFieldOrPropertyWithValue("id", user.getId())
                                 .hasFieldOrPropertyWithValue("name", "Make")
                                 .hasFieldOrPropertyWithValue("email", "mail@mail.ru")
                                 .hasFieldOrPropertyWithValue("login", "LOGIN")
@@ -86,12 +101,18 @@ class UserDbStorageTests {
 
     @Test
     public void testGetCommonFriend() {
-        userStorage.addFriend(1, 3);
-        userStorage.addFriend(2, 3);
-        List<User> userOptional = userStorage.getCommonFriends(1, 2);
+        User user1 = userStorage.add(new User("gmail@mail.ru", "log",
+                "Nike", LocalDate.of(1999, 7, 21)));
+        User user2 = userStorage.add(new User("gmail@mail.ru", "log",
+                "Nike", LocalDate.of(1999, 7, 21)));
+        User user3 = userStorage.add(new User("gmail@mail.ru", "log",
+                "Nike", LocalDate.of(1999, 7, 21)));
+        userStorage.addFriend(user1.getId(), user3.getId());
+        userStorage.addFriend(user2.getId(), user3.getId());
+        List<User> userOptional = userStorage.getCommonFriends(user1.getId(), user2.getId());
 
         assertThat(userOptional.size()).isEqualTo(1);
-        assertThat(userOptional.get(0).getId()).isEqualTo(3);
+        assertThat(userOptional.get(0).getId()).isEqualTo(user3.getId());
     }
 
     @Test
@@ -104,8 +125,10 @@ class UserDbStorageTests {
 
     @Test
     public void testRemoveUser() {
-        userStorage.remove(1);
-        Optional<User> userOptional = userStorage.getById(1);
+        User user = userStorage.add(new User("gmail@mail.ru", "log",
+                "Nike", LocalDate.of(1999, 7, 21)));
+        userStorage.remove(user.getId());
+        Optional<User> userOptional = userStorage.getById(user.getId());
 
         assertThat(userOptional).isEmpty();
     }

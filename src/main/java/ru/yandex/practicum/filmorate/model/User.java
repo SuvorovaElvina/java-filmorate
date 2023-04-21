@@ -1,8 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -15,18 +14,20 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
-    private Integer id;
+    Integer id;
     @NotBlank(message = "Email не должно быть пустым.")
     @Email(message = "Введён не email.")
-    private String email;
+    String email;
     @NotBlank(message = "Логин не должно быть пустым.")
     @Pattern(regexp = "^[A-Za-z0-9]+$")
-    private String login;
-    private String name;
+    String login;
+    String name;
     @Past(message = "День рождения не должно быть в будущем.")
-    private LocalDate birthday;
-    private Set<Integer> friends = new HashSet<>();
+    LocalDate birthday;
+    Set<Integer> friends = new HashSet<>();
 
     public User(String email, String login, String name, LocalDate birthday) {
         this.email = email;

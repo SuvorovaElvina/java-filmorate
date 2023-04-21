@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate;
+package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;

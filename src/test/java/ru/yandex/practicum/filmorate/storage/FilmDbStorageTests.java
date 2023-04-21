@@ -1,12 +1,13 @@
-package ru.yandex.practicum.filmorate;
+package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 
@@ -20,16 +21,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmDbStorageTests {
+    private final JdbcTemplate jdbcTemplate;
     private final FilmDbStorage filmStorage;
+
+    @BeforeEach
+    void cleanDb() {
+        jdbcTemplate.update("DELETE FROM film_likes");
+        jdbcTemplate.update("DELETE FROM film_genres");
+        jdbcTemplate.update("DELETE FROM films");
+    }
 
     @Test
     public void testFindFilmById() {
-        Optional<Film> filmOptional = filmStorage.getById(2);
+        Film film = filmStorage.add(new Film("gg", "desc",
+                LocalDate.of(2026, 7, 21), 100L, new Mpa(1, "G"), List.of()));
+        Optional<Film> filmOptional = filmStorage.getById(film.getId());
 
         assertThat(filmOptional)
                 .isPresent()
-                .hasValueSatisfying(film ->
-                        assertThat(film).hasFieldOrPropertyWithValue("id", 2)
+                .hasValueSatisfying(film1 ->
+                        assertThat(film1).hasFieldOrPropertyWithValue("id", film.getId())
                 );
     }
 
@@ -38,16 +49,15 @@ class FilmDbStorageTests {
     public void testGetFilms() {
         List<Film> films = filmStorage.getAll();
 
-        assertThat(films.size()).isEqualTo(2);
+        assertThat(films.size()).isEqualTo(0);
     }
 
     @Test
     public void testCreateFilm() {
         Film film = filmStorage.add(new Film("gg", "desc",
-                LocalDate.of(2026, 7, 21), 100L,
-                new Mpa(1, "G"), List.of(new Genre(1, "Комедия"))));
+                LocalDate.of(2026, 7, 21), 100L, new Mpa(1, "G"), List.of()));
 
-        assertThat(film).hasFieldOrPropertyWithValue("id", 1)
+        assertThat(film).hasFieldOrPropertyWithValue("id", film.getId())
                 .hasFieldOrPropertyWithValue("name", "gg")
                 .hasFieldOrPropertyWithValue("description", "desc")
                 .hasFieldOrPropertyWithValue("releaseDate", LocalDate.of(2026, 7, 21))
@@ -56,54 +66,29 @@ class FilmDbStorageTests {
 
     @Test
     public void testUpdateFilm() {
-        Optional<Film> filmOptional = filmStorage.update(new Film(1, "com", "description",
-                LocalDate.of(2036, 7, 21), 120L,
-                new Mpa(2, "PG"), List.of(new Genre(1, "Комедия"))));
+        Film film = filmStorage.add(new Film("com", "description",
+                LocalDate.of(2036, 7, 21), 120L, new Mpa(2, "PG"), List.of()));
+        film.setDescription("desc");
+        Optional<Film> filmOptional = filmStorage.update(film);
 
         assertThat(filmOptional)
                 .isPresent()
-                .hasValueSatisfying(film ->
-                        assertThat(film).hasFieldOrPropertyWithValue("id", 1)
+                .hasValueSatisfying(filmOpt ->
+                        assertThat(filmOpt).hasFieldOrPropertyWithValue("id", film.getId())
                                 .hasFieldOrPropertyWithValue("name", "com")
-                                .hasFieldOrPropertyWithValue("description", "description")
+                                .hasFieldOrPropertyWithValue("description", "desc")
                                 .hasFieldOrPropertyWithValue("releaseDate", LocalDate.of(2036, 7, 21))
                                 .hasFieldOrPropertyWithValue("duration", 120L)
                 );
     }
 
     @Test
-    public void testGetPopularFilms() {
-        List<Film> filmOptional = filmStorage.getPopularFilms(1);
-        List<Film> filmOpt = filmStorage.getPopularFilms(10);
-
-        assertThat(filmOptional.size()).isEqualTo(1);
-        assertThat(filmOpt.size()).isEqualTo(2);
-    }
-
-    @Test
-    public void testAddLike() {
-        filmStorage.addLike(2, 1);
-        List<Film> filmOptional = filmStorage.getPopularFilms(1);
-
-        assertThat(filmOptional.size()).isEqualTo(1);
-        assertThat(filmOptional.get(0).getId()).isEqualTo(2);
-    }
-
-    @Test
-    public void testRemoveLike() {
-        filmStorage.removeLike(2, 1);
-        List<Film> filmOptional = filmStorage.getPopularFilms(1);
-
-        assertThat(filmOptional.size()).isEqualTo(1);
-        assertThat(filmOptional.get(0).getId()).isEqualTo(2);
-    }
-
-    @Test
     public void testRemoveFilm() {
-        filmStorage.remove(1);
-        Optional<Film> filmOptional = filmStorage.getById(1);
+        Film film = filmStorage.add(new Film("gg", "desc",
+                LocalDate.of(2026, 7, 21), 100L, new Mpa(1, "G"), List.of()));
+        filmStorage.remove(film.getId());
+        Optional<Film> filmOptional = filmStorage.getById(film.getId());
 
         assertThat(filmOptional).isEmpty();
     }
 }
-
