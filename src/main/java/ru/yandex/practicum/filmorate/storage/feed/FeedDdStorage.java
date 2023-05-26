@@ -19,7 +19,7 @@ public class FeedDdStorage implements FeedStorage {
     public void createFeed(int userId, String eventType, String operation, int entityId) {
         long timestamp = Timestamp.from(Instant.now()).getTime();
         eventId += 1;
-        String sql = "INSERT INTO feed (userId, timestamp, eventType, operation, entityId, eventId) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO feeds (user_id, timestamp, event_type, operation, entity_id, event_id) VALUES (?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql, userId, timestamp, eventType, operation, entityId, eventId);
     }
 }

@@ -136,14 +136,14 @@ public class UserDbStorage implements UserStorage {
     }
 
     public List<Feed> getUserFeed(Integer id) {
-        String sql = "SELECT eventId, userId, entityId, eventType, operation, timestamp FROM feed WHERE userId = ?";
+        String sql = "SELECT event_id, user_id, entity_id, event_type, operation, timestamp FROM feeds WHERE user_id = ?";
         List<Map<String, Object>> feedList = jdbcTemplate.queryForList(sql, id);
         List<Feed> feeds = new ArrayList<>();
         for (Map<String, Object> feed : feedList) {
-            int eventId = (int) feed.get("eventId");
-            int userId = (int) feed.get("userId");
-            int entityId = (int) feed.get("entityId");
-            String eventType = (String) feed.get("eventType");
+            int eventId = (int) feed.get("event_id");
+            int userId = (int) feed.get("user_id");
+            int entityId = (int) feed.get("entity_id");
+            String eventType = (String) feed.get("event_type");
             String operation = (String) feed.get("operation");
             long timestamp = (long) feed.get("timestamp");
             Feed f = new Feed(eventId, userId, timestamp, eventType, operation, entityId);
